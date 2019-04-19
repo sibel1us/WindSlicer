@@ -34,7 +34,7 @@ namespace WindSlicer.Utilities
             {
                 case WindowCommand _:
                     return _window.Value;
-                case DirectoryCommand _:
+                case FolderCommand _:
                     return _folder.Value;
                 case ApplicationCommand cmd:
                     return GetApplicationIcon(cmd);

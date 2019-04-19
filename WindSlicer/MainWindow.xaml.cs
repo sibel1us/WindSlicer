@@ -46,6 +46,8 @@ namespace WindSlicer
 
         public MainWindow()
         {
+            var x = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
             this.InitializeComponent();
 
 
@@ -142,9 +144,10 @@ namespace WindSlicer
                 this.Commands.Add(new KeyPress(Key.T), new ApplicationCommand(locTeams));
                 this.Commands.Add(new KeyPress(Key.O), new ApplicationCommand(locOutlook));
                 this.Commands.Add(new KeyPress(Key.N), new ApplicationCommand(locNpp));
-                this.Commands.Add(new KeyPress(Key.W), new DirectoryCommand(@"C:\Work"));
-                this.Commands.Add(new KeyPress(Key.D), new DirectoryCommand(Environment.SpecialFolder.MyDocuments));
-                this.Commands.Add(new KeyPress(Key.P), new DirectoryCommand(Environment.SpecialFolder.MyPictures));
+                this.Commands.Add(new KeyPress(Key.W), new FolderCommand(@"C:\Work"));
+                this.Commands.Add(new KeyPress(Key.L), new FolderCommand(Environment.SpecialFolder.MyComputer));
+                this.Commands.Add(new KeyPress(Key.D), new FolderCommand(Environment.SpecialFolder.MyDocuments));
+                this.Commands.Add(new KeyPress(Key.P), new FolderCommand(Environment.SpecialFolder.MyPictures));
             }
 
             this.CmdWindow.Enable(NativeMethods.GetForegroundWindow(), snapsDefined ? null : this.Commands);
