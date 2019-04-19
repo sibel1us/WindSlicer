@@ -45,7 +45,7 @@ namespace WindSlicer.Commands.General
         protected override bool IsCorrectWindow(SHDocVw.InternetExplorer window)
         {
             if (this.SpecialFolder == SpecialFolder.MyComputer)
-                return window.LocationName == "";
+                return window.LocationURL == "";
 
             return base.IsCorrectWindow(window);
         }
@@ -66,16 +66,16 @@ namespace WindSlicer.Commands.General
     /// </summary>
     public class FolderCommand : BaseCommand
     {
+        private string name = null;
+
         /// <summary>
         /// 
         /// </summary>
         public string Directory { get; }
 
-        private string name = null;
-
         public FolderCommand(string path)
         {
-            this.Directory = GetFullPath(path);
+            this.Directory = this.GetFullPath(path);
         }
 
         protected virtual string GetFullPath(string path)
