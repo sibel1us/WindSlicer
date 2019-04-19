@@ -1,0 +1,80 @@
+﻿<Window x:Class="WindSlicer.CommandWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:local="clr-namespace:WindSlicer"
+        xmlns:converters="clr-namespace:WindSlicer.Utilities.Converters"
+        mc:Ignorable="d"
+        Title="SnapWindow"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        ShowActivated="True"
+        ShowInTaskbar="False"
+        Topmost="True"
+        AllowsTransparency="True"
+        ResizeMode="NoResize"
+        
+        Width="1000"
+        Height="500"
+        
+        PreviewKeyDown="Window_PreviewKeyDown"
+        Deactivated="Window_Deactivated"
+        LostKeyboardFocus="Window_LostKeyboardFocus"
+        Closing="Window_Closing"
+        BorderThickness="2"
+
+        x:Name="CmdWnd"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <Window.Background>
+        <SolidColorBrush Opacity="0.5" Color="White"/>
+    </Window.Background>
+    <Window.BorderBrush>
+        <SolidColorBrush Opacity="0.5" Color="Black"/>
+    </Window.BorderBrush>
+    <Window.Resources>
+        <converters:CanExecuteToBooleanConverter x:Key="CanExecuteToBooleanConverter"/>
+        <converters:CommandToImageConverter x:Key="CommandToImageConverter"/>
+        <CollectionViewSource x:Key="SortedCommands" Source="{Binding Commands}">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="Key"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+    </Window.Resources>
+    <ItemsControl ItemsSource="{Binding Source={StaticResource SortedCommands}}" Margin="10">
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <Button Command="{Binding Value}"
+                        CommandParameter="{Binding ElementName=CmdWnd, Path=ActiveHwnd, Mode=OneWay}"
+                        Margin="4"
+                        HorizontalContentAlignment="Stretch"
+                        ToolTip="Test"
+                        ToolTipService.ShowOnDisabled="True">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Source="{Binding Value, Converter={StaticResource CommandToImageConverter}}"
+                               Width="16"
+                               Height="16"
+                               Margin="4,0,4,0"></Image>
+                        <Label Grid.Column="1"
+                               Content="{Binding Key}"
+                               FontWeight="Bold"/>
+                        <Label Grid.Column="2"
+                               Content="{Binding Value}"
+                               HorizontalAlignment="Left"/>
+                    </Grid>
+                </Button>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <WrapPanel Orientation="Vertical"/>
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+    </ItemsControl>
+</Window>
