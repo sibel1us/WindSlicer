@@ -127,8 +127,6 @@ namespace WindSlicer
                 this.Hide();
             }
 
-            this.Hide();
-
             // Don't trigger for only modifiers
             if (_modifiers.Contains(e.Key))
             {
@@ -151,13 +149,13 @@ namespace WindSlicer
             }
 
             // Not found
-            if (Commands.Keys.None(kp => kp.Equals(keyPress)))
+            if (Commands.Keys.None(kp => kp.IsMatch(keyPress)))
             {
                 Done();
                 return;
             }
 
-            var match = Commands.First(kvp => kvp.Key.Equals(keyPress));
+            var match = Commands.First(kvp => kvp.Key.IsMatch(keyPress));
 
             // Prime chord
             if (ChordPrimer == null && match.Key is KeyChord chord)
