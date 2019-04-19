@@ -7,32 +7,80 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using WindSlicer.Win32;
+using static System.Environment;
 
 namespace WindSlicer.Commands.General
 {
+    public class SpecialFolderCommand : FolderCommand
+    {
+        private static HashSet<SpecialFolder> validValues =
+            new HashSet<SpecialFolder>(
+                Enum.GetValues(typeof(SpecialFolder)).Cast<SpecialFolder>());
+
+        public SpecialFolder SpecialFolder { get; }
+
+        public SpecialFolderCommand(SpecialFolder folder)
+            : base(Environment.GetFolderPath(folder))
+        {
+            this.SpecialFolder = folder;
+        }
+
+        protected override string GetFullPath(string path)
+        {
+            return path;
+        }
+
+        protected override void OpenWindow()
+        {
+            if (this.SpecialFolder == SpecialFolder.MyComputer)
+            {
+                Process.Start("::{20d04fe0-3aea-1069-a2d8-08002b30309d}");
+            }
+            else
+            {
+                base.OpenWindow();
+            }
+        }
+
+        protected override bool IsCorrectWindow(SHDocVw.InternetExplorer window)
+        {
+            if (this.SpecialFolder == SpecialFolder.MyComputer)
+                return window.LocationName == "";
+
+            return base.IsCorrectWindow(window);
+        }
+
+        public override bool CanExecute(object parameter)
+        {
+            return validValues.Contains(this.SpecialFolder);
+        }
+
+        public override string ToString()
+        {
+            return this.SpecialFolder.ToString();
+        }
+    }
+
     /// <summary>
     /// Open a directory, or bring it to foreground if it's already open.
     /// </summary>
     public class FolderCommand : BaseCommand
     {
-        private readonly Environment.SpecialFolder? special;
-
-        private bool MyComputer => this.special == Environment.SpecialFolder.MyComputer;
-
         /// <summary>
         /// 
         /// </summary>
         public string Directory { get; }
 
+        private string name = null;
+
         public FolderCommand(string path)
         {
-            this.Directory = Path.GetFullPath(path);
+            this.Directory = GetFullPath(path);
         }
 
-        public FolderCommand(Environment.SpecialFolder folder)
+        protected virtual string GetFullPath(string path)
         {
-            this.special = folder;
-            this.Directory = Environment.GetFolderPath(folder);
+            return Path.GetFullPath(path);
         }
 
         public override void Execute(object parameter = null)
@@ -56,52 +104,45 @@ namespace WindSlicer.Commands.General
                         }
 
                         NativeMethods.ShowWindow(hwnd, (int)ShowWindowCommands.Show);
+
                         bool shown = NativeMethods.SetForegroundWindow(hwnd);
+
+                        // Found correct
+                        return;
                     }
                 }
             }
 
-            if (this.MyComputer)
-            {
-                Process.Start("::{20d04fe0-3aea-1069-a2d8-08002b30309d}");
-            }
-            else
-            {
-
-                new Process { StartInfo = new ProcessStartInfo(this.Directory) }.Start();
-            }
+            this.OpenWindow();
         }
 
-        private bool IsCorrectWindow(SHDocVw.InternetExplorer window)
+        protected virtual void OpenWindow()
         {
-            if (string.IsNullOrEmpty(window.LocationName) && !this.MyComputer)
+            var proc = new Process
+            {
+                StartInfo = new ProcessStartInfo(this.Directory)
+            };
+
+            proc.Start();
+        }
+
+        protected virtual bool IsCorrectWindow(SHDocVw.InternetExplorer window)
+        {
+            if (string.IsNullOrEmpty(window.LocationURL))
                 return false;
 
-            string windowPath;
-
-            if (this.MyComputer)
-            {
-                windowPath = "";
-            }
-            else
-            {
-                var uri = new Uri(window.LocationURL);
-                windowPath = Path.GetFullPath(uri.LocalPath);
-            }
-
-            return this.Directory == windowPath;
+            var uri = new Uri(window.LocationURL);
+            return this.Directory == Path.GetFullPath(uri.LocalPath);
         }
 
         public override bool CanExecute(object parameter)
         {
-            return System.IO.Directory.Exists(this.Directory) || this.MyComputer;
+            return System.IO.Directory.Exists(this.Directory);
         }
 
         public override string ToString()
         {
-            return this.special.HasValue
-                ? this.special.Value.ToString()
-                : new DirectoryInfo(this.Directory).Name;
+            return name ?? (name = new DirectoryInfo(this.Directory).Name);
         }
     }
 }

@@ -16,8 +16,8 @@
         AllowsTransparency="True"
         ResizeMode="NoResize"
         
-        Width="1000"
         Height="500"
+        SizeToContent="Width"
         
         PreviewKeyDown="Window_PreviewKeyDown"
         Deactivated="Window_Deactivated"

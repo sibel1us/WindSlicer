@@ -82,7 +82,7 @@
     <Compile Include="Commands\General\ApplicationCommand.cs" />
     <Compile Include="Commands\General\CalendarCommand.cs" />
     <Compile Include="Commands\General\CloseProcessCommand.cs" />
-    <Compile Include="Commands\General\DirectoryCommand.cs" />
+    <Compile Include="Commands\General\FolderCommand.cs" />
     <Compile Include="Commands\Keys\IKeyPress.cs" />
     <Compile Include="Commands\Keys\KeyChord.cs" />
     <Compile Include="Commands\Keys\KeyPress.cs" />
