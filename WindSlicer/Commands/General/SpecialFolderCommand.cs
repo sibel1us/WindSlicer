@@ -11,9 +11,15 @@ namespace WindSlicer.Commands.General
 {
     public class SpecialFolderCommand : FolderCommand
     {
+        /// <summary>
+        /// </summary>
+        /// <remarks>
+        /// <see cref="Environment.SpecialFolder"/> defines My Documents twice, so construct
+        /// with Distinct.
+        /// </remarks>
         private static readonly IReadOnlyDictionary<SpecialFolder, string> valueCache =
             new LazyDictionary<SpecialFolder, string>(
-                Util.ValuesOf<SpecialFolder>(),
+                Util.ValuesOf<SpecialFolder>().Distinct(),
                 x => GetFolderPath(x));
 
         public SpecialFolder SpecialFolder { get; }
@@ -24,9 +30,10 @@ namespace WindSlicer.Commands.General
         }
 
         /// <summary>
-        /// Overridden to prevent 
+        /// Overridden to prevent an error as "My Computer" returns an empty path, and
+        /// other special folders return a full path.
         /// </summary>
-        protected override string GetPathFromParameter(string path)
+        protected override string GetFullPathFromParameter(string path)
         {
             return path;
         }
