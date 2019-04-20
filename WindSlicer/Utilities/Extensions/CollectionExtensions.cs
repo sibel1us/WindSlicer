@@ -10,17 +10,11 @@ namespace WindSlicer.Utilities.Extensions
     {
         public static bool None<T>(this IEnumerable<T> @this)
         {
-            if (@this is null)
-                throw new ArgumentNullException(nameof(@this));
-
             return !@this.Any();
         }
 
         public static bool None<T>(this IEnumerable<T> @this, Func<T, bool> predicate)
         {
-            if (@this is null)
-                throw new ArgumentNullException(nameof(@this));
-
             return !@this.Any(predicate);
         }
 
@@ -45,6 +39,21 @@ namespace WindSlicer.Utilities.Extensions
             {
                 @this.Add(kvp.Key, kvp.Value);
             }
+        }
+
+        public static bool TryGetFirst<T>(
+            this IEnumerable<T> @this,
+            Func<T, bool> predicate,
+            out T value)
+        {
+            foreach (var item in @this.Where(predicate))
+            {
+                value = item;
+                return true;
+            }
+
+            value = default;
+            return false;
         }
     }
 }
