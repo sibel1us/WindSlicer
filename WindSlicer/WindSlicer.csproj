@@ -98,6 +98,7 @@
     </Compile>
     <Compile Include="Utilities\Converters\CanExecuteToBooleanConverter.cs" />
     <Compile Include="Utilities\Converters\CommandToImageConverter.cs" />
+    <Compile Include="Utilities\Util.cs" />
     <Compile Include="Utilities\Extensions\CollectionExtensions.cs" />
     <Compile Include="Utilities\IconProvider.cs" />
     <Compile Include="Utilities\InlineComparer.cs" />
