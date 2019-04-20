@@ -15,7 +15,7 @@ namespace WindSlicer.Commands.General
     /// </summary>
     public class FolderCommand : BaseCommand
     {
-        private string name = null;
+        private string displayName = null;
 
         /// <summary>
         /// 
@@ -47,12 +47,7 @@ namespace WindSlicer.Commands.General
                     {
                         IntPtr hwnd = (IntPtr)window.HWND;
 
-                        if (NativeMethods.IsIconic(hwnd))
-                        {
-                            NativeMethods.ShowWindow(hwnd, (int)ShowWindowCommands.Restore);
-                        }
-
-                        NativeMethods.ShowWindow(hwnd, (int)ShowWindowCommands.Show);
+                        NativeMethods.RestoreAndShowWindow(hwnd);
 
                         bool shown = NativeMethods.SetForegroundWindow(hwnd);
 
@@ -91,7 +86,7 @@ namespace WindSlicer.Commands.General
 
         public override string ToString()
         {
-            return name ?? (name = new DirectoryInfo(this.Directory).Name);
+            return displayName ?? (displayName = new DirectoryInfo(this.Directory).Name);
         }
     }
 }

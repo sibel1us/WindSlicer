@@ -74,19 +74,10 @@ namespace WindSlicer.Commands.General
             {
                 IntPtr hwnd = GetPreferredWindow(process) ?? process.MainWindowHandle;
 
-                bool restored = true;
-                bool shown = false;
-                bool foreground = false;
+                bool shown = NativeMethods.RestoreAndShowWindow(hwnd);
+                bool foreground = NativeMethods.SetForegroundWindow(hwnd);
 
-                if (NativeMethods.IsIconic(hwnd))
-                {
-                    restored = NativeMethods.ShowWindow(hwnd, (int)ShowWindowCommands.Restore);
-                }
-
-                shown = NativeMethods.ShowWindow(hwnd, (int)ShowWindowCommands.Show);
-                foreground = NativeMethods.SetForegroundWindow(hwnd);
-
-                if (restored && shown && foreground)
+                if (shown && foreground)
                 {
                     if (this.FollowupMode.HasFlag(FollowupModes.AppOpen)
                         && Followup != null)

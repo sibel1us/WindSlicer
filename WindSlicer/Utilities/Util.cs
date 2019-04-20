@@ -13,7 +13,8 @@ namespace WindSlicer.Utilities
     public static class Util
     {
         /// <summary>
-        /// Get possible values of <typeparamref name="T"/> using <see cref="Enum.GetValues(Type)"/>.
+        /// Get all defined values of <typeparamref name="T"/> using <see
+        /// cref="Enum.GetValues(Type)"/>.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>

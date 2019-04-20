@@ -54,6 +54,23 @@ namespace WindSlicer.Win32
         /// </summary>
         public static Win32Exception LastError => new Win32Exception(Marshal.GetLastWin32Error());
 
+        /// <summary>
+        /// Restore window if it is iconic and show it. Equivalent to calling <see
+        /// cref="ShowWindow(IntPtr, int)"/> first with <see cref="ShowWindowCommands.Restore"/> and
+        /// then with <see cref="ShowWindowCommands.Show"/>.
+        /// </summary>
+        /// <param name="hWnd"></param>
+        /// <returns></returns>
+        public static bool RestoreAndShowWindow(IntPtr hWnd)
+        {
+            if (IsIconic(hWnd))
+            {
+                ShowWindow(hWnd, (int)ShowWindowCommands.Restore);
+            }
+
+            return ShowWindow(hWnd, (int)ShowWindowCommands.Show);
+        }
+
         public static bool ClientResize(IntPtr hWnd, int newWidth, int newHeight)
         {
             bool gotClientRect = GetClientRect(hWnd, out RECT clientRect);

@@ -15,6 +15,9 @@ namespace WindSlicer.Utilities
     /// </summary>
     /// <typeparam name="K"></typeparam>
     /// <typeparam name="V"></typeparam>
+    /// <remarks>
+    /// This class is a little unnecessary, it is mainly written as a mental excercise.
+    /// </remarks>
     public class LazyDictionary<K, V> : IReadOnlyDictionary<K, V>
     {
         /// <summary>
@@ -35,19 +38,19 @@ namespace WindSlicer.Utilities
         public int Count => this.inner.Count;
 
         /// <summary>
-        /// Initialize a new lazy loaded dictionary using the default thread safety mode <see
-        /// cref="LazyThreadSafetyMode.ExecutionAndPublication"/>.
+        /// Initialize a new lazy dictionary with thread safe value initialization.
         /// </summary>
         /// <param name="keys">Keys to seed the dictionary with</param>
         /// <param name="valueFactory">
         /// Value factory method passed into the inner <see cref="Lazy{T}"/> values.
         /// </param>
         public LazyDictionary(IEnumerable<K> keys, Func<K, V> valueFactory)
-            : this (keys, valueFactory, LazyThreadSafetyMode.ExecutionAndPublication)
+            : this(keys, valueFactory, LazyThreadSafetyMode.ExecutionAndPublication)
         { }
 
         /// <summary>
-        /// Initialize a new lazy loaded diictionary using the specified thread safety option.
+        /// Initialize a new lazy loaded diictionary using the specified thread safety option for
+        /// value initialization.
         /// </summary>
         /// <param name="keys">Keys to seed the dictionary with</param>
         /// <param name="valueFactory">
@@ -57,13 +60,14 @@ namespace WindSlicer.Utilities
         /// Thread safety option passed into the inner <see cref="Lazy{T}"/> values.
         /// </param>
         public LazyDictionary(IEnumerable<K> keys, Func<K, V> valueFactory, bool isThreadSafe)
-            :this (keys,valueFactory,isThreadSafe
+            : this(keys, valueFactory, isThreadSafe
                  ? LazyThreadSafetyMode.ExecutionAndPublication
                  : LazyThreadSafetyMode.None)
         { }
 
         /// <summary>
-        /// Initialize a new lazy loaded diictionary using the specified thread safety mode. ///
+        /// Initialize a new lazy loaded diictionary using the specified thread safety mode for value
+        /// initialization.
         /// </summary>
         /// <param name="keys">Keys to seed the dictionary with</param>
         /// <param name="valueFactory">

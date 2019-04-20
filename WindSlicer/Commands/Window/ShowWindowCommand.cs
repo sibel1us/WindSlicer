@@ -25,13 +25,7 @@ namespace WindSlicer.Commands.Window
         public override void Execute(object parameter)
         {
             IntPtr hWnd = (IntPtr)parameter;
-
-            if (NativeMethods.IsIconic(hWnd))
-            {
-                NativeMethods.ShowWindow(hWnd, (int)ShowWindowCommands.Restore);
-            }
-
-            NativeMethods.ShowWindow(hWnd, (int)ShowWindowCommands.Show);
+            NativeMethods.RestoreAndShowWindow(hWnd);
         }
 
         public override bool Equals(object obj) => obj is ShowWindowCommand;
