@@ -106,7 +106,9 @@
     <Compile Include="Utilities\InlineComparer.cs" />
     <Compile Include="Win32\Enums.cs" />
     <Compile Include="Win32\GCHandleProvider.cs" />
-    <Compile Include="Win32\KeyboardHook.cs" />
+    <Compile Include="Win32\Hooks\DragWindowHook.cs" />
+    <Compile Include="Win32\Hooks\KeyboardHook.cs" />
+    <Compile Include="Win32\Hooks\WindowsHook.cs" />
     <Compile Include="Win32\NativeApi.cs" />
     <Compile Include="Win32\NativeMethods.cs" />
     <Compile Include="MainWindow.xaml.cs">

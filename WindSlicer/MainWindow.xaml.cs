@@ -18,6 +18,7 @@ using WindSlicer.Commands.General;
 using WindSlicer.Commands.Keys;
 using WindSlicer.Commands.Window;
 using WindSlicer.Win32;
+using WindSlicer.Win32.Hooks;
 
 namespace WindSlicer
 {
@@ -26,7 +27,8 @@ namespace WindSlicer
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly KeyboardHook hook;
+        private readonly KeyboardHook kbHook;
+        private readonly GlobalDragHook dragHook;
 
         public bool Minimized => this.WindowState == WindowState.Minimized;
 
@@ -39,10 +41,12 @@ namespace WindSlicer
         {
             this.InitializeComponent();
 
-            this.hook = new KeyboardHook();
+            this.kbHook = new KeyboardHook();
             this.InitHotkeys();
 
             //InitTrayIcon();
+            this.dragHook = new GlobalDragHook();
+            this.InitDragHook();
 
             this.CmdWindow = new CommandWindow();
 
@@ -51,14 +55,30 @@ namespace WindSlicer
 
         private void InitHotkeys()
         {
-            this.hook.RegisterHotKey(ModifierKeys.Control, System.Windows.Forms.Keys.OemBackslash);
-            this.hook.KeyPressed += (_, args) =>
+            this.kbHook.RegisterHotKey(ModifierKeys.Control, System.Windows.Forms.Keys.OemBackslash);
+            this.kbHook.KeyPressed += (_, args) =>
             {
                 if (args.Modifier == ModifierKeys.Control)
                 {
                     this.ShowSnapWindow();
                 }
             };
+        }
+
+        private void InitDragHook()
+        {
+            //this.dragHook.Subscribe();
+            //this.dragHook.WindowDragged += (_, args) =>
+            //{
+            //    if (!args.DragEnded)
+            //    {
+            //        System.Media.SystemSounds.Asterisk.Play();
+            //    }
+            //    else
+            //    {
+            //        System.Media.SystemSounds.Asterisk.Play();
+            //    }
+            //};
         }
 
         private void InitTrayIcon()
@@ -149,7 +169,8 @@ namespace WindSlicer
         {
             if (!e.Cancel)
             {
-                this.hook.Dispose();
+                this.kbHook.Dispose();
+                this.dragHook.Dispose();
             }
         }
     }

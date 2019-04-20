@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 
-namespace WindSlicer.Win32
+namespace WindSlicer.Win32.Hooks
 {
     public sealed class KeyboardHook : IDisposable
     {
