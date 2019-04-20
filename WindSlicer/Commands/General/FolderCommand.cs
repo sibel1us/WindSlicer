@@ -7,60 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using WindSlicer.Win32;
-using static System.Environment;
 
 namespace WindSlicer.Commands.General
 {
-    public class SpecialFolderCommand : FolderCommand
-    {
-        private static HashSet<SpecialFolder> validValues =
-            new HashSet<SpecialFolder>(
-                Enum.GetValues(typeof(SpecialFolder)).Cast<SpecialFolder>());
-
-        public SpecialFolder SpecialFolder { get; }
-
-        public SpecialFolderCommand(SpecialFolder folder)
-            : base(Environment.GetFolderPath(folder))
-        {
-            this.SpecialFolder = folder;
-        }
-
-        protected override string GetFullPath(string path)
-        {
-            return path;
-        }
-
-        protected override void OpenWindow()
-        {
-            if (this.SpecialFolder == SpecialFolder.MyComputer)
-            {
-                Process.Start("::{20d04fe0-3aea-1069-a2d8-08002b30309d}");
-            }
-            else
-            {
-                base.OpenWindow();
-            }
-        }
-
-        protected override bool IsCorrectWindow(SHDocVw.InternetExplorer window)
-        {
-            if (this.SpecialFolder == SpecialFolder.MyComputer)
-                return window.LocationURL == "";
-
-            return base.IsCorrectWindow(window);
-        }
-
-        public override bool CanExecute(object parameter)
-        {
-            return validValues.Contains(this.SpecialFolder);
-        }
-
-        public override string ToString()
-        {
-            return this.SpecialFolder.ToString();
-        }
-    }
-
     /// <summary>
     /// Open a directory, or bring it to foreground if it's already open.
     /// </summary>
@@ -75,10 +24,10 @@ namespace WindSlicer.Commands.General
 
         public FolderCommand(string path)
         {
-            this.Directory = this.GetFullPath(path);
+            this.Directory = this.GetPathFromParameter(path);
         }
 
-        protected virtual string GetFullPath(string path)
+        protected virtual string GetPathFromParameter(string path)
         {
             return Path.GetFullPath(path);
         }

@@ -46,10 +46,7 @@ namespace WindSlicer
 
         public MainWindow()
         {
-            var x = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-
             this.InitializeComponent();
-
 
             this.hook = new KeyboardHook();
             this.InitHotkeys();
