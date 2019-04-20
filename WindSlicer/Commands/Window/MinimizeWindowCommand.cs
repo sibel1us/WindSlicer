@@ -8,6 +8,14 @@ namespace WindSlicer.Commands.Window
     /// </summary>
     public class MinimizeWindowCommand : WindowCommand
     {
+        private static readonly MinimizeWindowCommand _slave = new MinimizeWindowCommand();
+
+        public static void ExecuteOn(IntPtr hwnd)
+        {
+            if (_slave.CanExecute(hwnd))
+                _slave.Execute(hwnd);
+        }
+
         /// <summary>
         /// Initialize a new command to minimize a window.
         /// </summary>

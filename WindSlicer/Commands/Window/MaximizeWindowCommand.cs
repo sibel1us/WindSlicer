@@ -8,6 +8,14 @@ namespace WindSlicer.Commands.Window
     /// </summary>
     public class MaximizeWindowCommand : WindowCommand
     {
+        private static readonly MaximizeWindowCommand _slave = new MaximizeWindowCommand();
+
+        public static void ExecuteOn(IntPtr hwnd)
+        {
+            if (_slave.CanExecute(hwnd))
+                _slave.Execute(hwnd);
+        }
+
         /// <summary>
         /// Initialize a new command to maximize a window.
         /// </summary>
