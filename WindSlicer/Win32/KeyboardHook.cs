@@ -26,13 +26,12 @@ namespace WindSlicer.Win32
         /// <summary>
         /// Represents the window that is used internally to get the messages.
         /// </summary>
-        private class Window : NativeWindow, IDisposable
+        private class HookedWindow : NativeWindow, IDisposable
         {
             private const int WM_HOTKEY = 0x0312;
 
-            public Window()
+            public HookedWindow()
             {
-                // create the handle for the window.
                 this.CreateHandle(new CreateParams());
             }
 
@@ -55,24 +54,20 @@ namespace WindSlicer.Win32
 
             public event EventHandler<KeyPressedEventArgs> KeyPressed;
 
-            #region IDisposable Members
-
             public void Dispose()
             {
                 this.DestroyHandle();
             }
-
-            #endregion
         }
 
-        private readonly Window window;
+        private readonly HookedWindow hookedWindow;
         private int currentId;
 
         public KeyboardHook()
         {
-            this.window = new Window();
+            this.hookedWindow = new HookedWindow();
 
-            this.window.KeyPressed += delegate (object _, KeyPressedEventArgs args)
+            this.hookedWindow.KeyPressed += delegate (object _, KeyPressedEventArgs args)
             {
                 KeyPressed?.Invoke(this, args);
             };
@@ -85,36 +80,27 @@ namespace WindSlicer.Win32
         /// <param name="key">The key itself that is associated with the hot key.</param>
         public void RegisterHotKey(ModifierKeys modifier, Keys key)
         {
-            // increment the counter.
             this.currentId += 1;
 
-            // register the hot key.
-            if (!RegisterHotKey(this.window.Handle, this.currentId, (uint)modifier, (uint)key))
+            if (!RegisterHotKey(this.hookedWindow.Handle, this.currentId, (uint)modifier, (uint)key))
+            {
                 throw new InvalidOperationException(
                     "Couldn't register the hotkey.",
                     NativeApi.LastError);
+            }
         }
 
-        /// <summary>
-        /// A hot key has been pressed.
-        /// </summary>
         public event EventHandler<KeyPressedEventArgs> KeyPressed;
-
-        #region IDisposable Members
 
         public void Dispose()
         {
-            // unregister all the registered hot keys.
             for (int i = this.currentId; i > 0; i--)
             {
-                UnregisterHotKey(this.window.Handle, i);
+                UnregisterHotKey(this.hookedWindow.Handle, i);
             }
 
-            // dispose the inner native window.
-            this.window.Dispose();
+            this.hookedWindow.Dispose();
         }
-
-        #endregion
     }
 
     /// <summary>
