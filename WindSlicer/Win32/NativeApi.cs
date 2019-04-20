@@ -240,7 +240,8 @@ namespace WindSlicer.Win32
         /// <returns></returns>
         public static int GetWindowProcessId(IntPtr hwnd)
         {
-            return (GetWindowThreadProcessId(hwnd, out int id) == 0) ? id : -1;
+            GetWindowThreadProcessId(hwnd, out int processId);
+            return processId;
         }
 
         /// <summary>
