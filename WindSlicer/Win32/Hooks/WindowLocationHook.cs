@@ -6,18 +6,17 @@ using System.Threading.Tasks;
 
 namespace WindSlicer.Win32.Hooks
 {
-    public class DragWindowHook : WindowsHook
+    public class WindowLocationHook : WindowsHook
     {
-        public event EventHandler<WindowDraggedEventArgs> WindowDragged;
+        public event EventHandler<WindowLocationChangedEventArgs> WindowLocationChanged;
 
         private const uint WINEVENT_OUTOFCONTEXT = 0;
-        private const uint EVENT_SYSTEM_MOVESIZESTART = 0x000A;
-        private const uint EVENT_SYSTEM_MOVESIZEEND = 0x000B;
+        private const uint EVENT_OBJECT_LOCATIONCHANGE = 0x800B;
 
         protected override IntPtr HWinEventHook { get; set; }
         protected override NativeMethods.WinEventDelegate EventDelegate { get; }
 
-        public DragWindowHook()
+        public WindowLocationHook()
         {
             this.EventDelegate = new NativeMethods.WinEventDelegate(this.WinEventProc);
         }
@@ -28,15 +27,15 @@ namespace WindSlicer.Win32.Hooks
                 throw new InvalidOperationException("Already subscribed");
 
             this.HWinEventHook = NativeMethods.SetWinEventHook(
-                EVENT_SYSTEM_MOVESIZESTART,
-                EVENT_SYSTEM_MOVESIZEEND,
+                EVENT_OBJECT_LOCATIONCHANGE,
+                EVENT_OBJECT_LOCATIONCHANGE,
                 IntPtr.Zero,
                 this.EventDelegate,
                 0,
                 0,
                 WINEVENT_OUTOFCONTEXT);
 
-            if (this.HWinEventHook == IntPtr.Zero)
+            if (IntPtr.Zero == this.HWinEventHook)
                 throw NativeApi.LastError;
         }
 
@@ -49,17 +48,10 @@ namespace WindSlicer.Win32.Hooks
             uint dwEventThread,
             uint dwmsEventTime)
         {
-            if (hwnd == IntPtr.Zero)
+            if (hwnd == IntPtr.Zero || eventType != EVENT_OBJECT_LOCATIONCHANGE)
                 return;
 
-            if (eventType == EVENT_SYSTEM_MOVESIZESTART)
-            {
-                WindowDragged?.Invoke(null, new WindowDraggedEventArgs(hwnd, false));
-            }
-            else if (eventType == EVENT_SYSTEM_MOVESIZEEND)
-            {
-                WindowDragged?.Invoke(null, new WindowDraggedEventArgs(hwnd, true));
-            }
+            WindowLocationChanged?.Invoke(null, new WindowLocationChangedEventArgs(hwnd));
         }
 
         public override void Dispose()
@@ -71,22 +63,13 @@ namespace WindSlicer.Win32.Hooks
         }
     }
 
-    public class WindowDraggedEventArgs : EventArgs
+    public class WindowLocationChangedEventArgs
     {
-        /// <summary>
-        /// Handle of the window being dragged.
-        /// </summary>
         public IntPtr HWnd { get; }
 
-        /// <summary>
-        /// Whether the drag ended or started.
-        /// </summary>
-        public bool DragEnded { get; }
-
-        public WindowDraggedEventArgs(IntPtr hwnd, bool dragEnded)
+        public WindowLocationChangedEventArgs(IntPtr hwnd)
         {
             this.HWnd = hwnd;
-            this.DragEnded = dragEnded;
         }
     }
 }

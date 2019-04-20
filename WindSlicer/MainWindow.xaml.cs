@@ -28,7 +28,7 @@ namespace WindSlicer
     public partial class MainWindow : Window
     {
         private readonly KeyboardHook kbHook;
-        private readonly GlobalDragHook dragHook;
+        private readonly DragWindowHook dragHook;
 
         public bool Minimized => this.WindowState == WindowState.Minimized;
 
@@ -44,10 +44,10 @@ namespace WindSlicer
             this.kbHook = new KeyboardHook();
             this.InitHotkeys();
 
-            //InitTrayIcon();
-            this.dragHook = new GlobalDragHook();
+            this.dragHook = new DragWindowHook();
             this.InitDragHook();
 
+            //InitTrayIcon();
             this.CmdWindow = new CommandWindow();
 
             this.Hide();

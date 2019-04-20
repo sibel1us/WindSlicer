@@ -13,7 +13,7 @@ namespace WindSlicer.Win32.Hooks
 
         protected abstract NativeMethods.WinEventDelegate EventDelegate { get; }
 
-        public abstract bool Subscribe();
+        public abstract void Subscribe();
 
         protected abstract void WinEventProc(
             IntPtr hWinEventHook,
