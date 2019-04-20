@@ -6,61 +6,41 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WindSlicer.Win32;
+using WindSlicer.Utilities.Extensions;
 
 namespace WindSlicer.Commands.General
 {
     public class ApplicationCommand : BaseCommand
     {
-        public enum FollowupModes
-        {
-            /// <summary>Never execute.</summary>
-            Never = 0,
-
-            /// <summary>When application was already open.</summary>
-            AppOpen = 1,
-
-            /// <summary>When application was not open and was started.</summary>
-            AppStarted = 2,
-
-            /// <summary>When application was brought to front or opened.</summary>
-            OnSuccess = AppOpen | AppStarted,
-        }
-
         public string ProcessName { get; private set; }
         public string FileLocation { get; private set; }
         public string Arguments { get; private set; }
 
         /// <summary>
-        /// Prioritize window with this classname over <see cref="Process.MainWindowHandle"/> if defined.
+        /// Prioritize window with this classname over <see cref="Process.MainWindowHandle"/> if
+        /// defined.
         /// </summary>
         public string WindowClassName { get; set; }
 
-        public ProcessWindowStyle? WindowStyle { get; set; }
+        public ProcessWindowStyle WindowStyle { get; set; }
 
         /// <summary>
-        /// Action to be executed after the application is brought to front or started.
+        /// Initializes a new application command.
         /// </summary>
-        public WindowCommand Followup { get; set; }
+        /// <param name="filePath"></param>
+        public ApplicationCommand(string filePath)
+            : this(filePath, null)
+        { }
 
         /// <summary>
-        /// Condition for <see cref="Followup"/> action. Default is <see cref="FollowupModes.OnSuccess"/>.
+        /// Initializes a new application command with the specified arguments.
         /// </summary>
-        public FollowupModes FollowupMode { get; set; } = FollowupModes.OnSuccess;
-
-        /// <summary>
-        /// Maximum time to wait for the process to accept input before canceling.
-        /// </summary>
-        public TimeSpan FollowupWaitTime { get; set; } = TimeSpan.FromSeconds(5);
-
-        public ApplicationCommand(Process process) : this(process.MainModule.FileName) { }
-
-        public ApplicationCommand(string filePath, string arguments = null)
+        /// <param name="filePath"></param>
+        /// <param name="arguments">
+        /// Arguments used to start the executable if it is not already runnin.
+        /// </param>
+        public ApplicationCommand(string filePath, string arguments)
         {
-            if (!File.Exists(filePath))
-            {
-                //throw new FileNotFoundException("Couldn't find the specified file", filePath);
-            }
-
             this.ProcessName = Path.GetFileName(filePath);
             this.FileLocation = Path.GetFullPath(filePath);
             this.Arguments = arguments;
@@ -68,60 +48,28 @@ namespace WindSlicer.Commands.General
 
         public override void Execute(object parameter)
         {
-            var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(FileLocation));
+            var processes = Process.GetProcessesByName(
+                Path.GetFileNameWithoutExtension(this.FileLocation));
 
-            if (processes.FirstOrDefault(p => p.MainWindowHandle != IntPtr.Zero) is Process process)
+            if (processes.FirstOrDefault(p => p.MainWindowHandle != IntPtr.Zero) is Process proc)
             {
-                IntPtr hwnd = GetPreferredWindow(process) ?? process.MainWindowHandle;
-
-                bool shown = NativeMethods.RestoreAndShowWindow(hwnd);
-                bool foreground = NativeMethods.SetForegroundWindow(hwnd);
-
-                if (shown && foreground)
-                {
-                    if (this.FollowupMode.HasFlag(FollowupModes.AppOpen)
-                        && Followup != null)
-                    {
-                        if (Followup.CanExecute(hwnd))
-                            Followup.Execute(hwnd);
-                    }
-                }
-                else
-                {
-                    // Couldn't restore window
-                }
-
+                var hwnd = this.GetPreferredWindowHandle(proc);
+                NativeApi.RestoreAndShowWindow(hwnd);
             }
             else
             {
                 // Start process
-                var startInfo = new ProcessStartInfo(FileLocation);
-
-                if (this.WindowStyle.HasValue)
+                var startInfo = new ProcessStartInfo(FileLocation)
                 {
-                    startInfo.WindowStyle = this.WindowStyle.Value;
-                }
+                    Arguments = this.Arguments,
+                    WindowStyle = this.WindowStyle
+                };
 
-                startInfo.Arguments = this.Arguments;
+                // TODO: create ChainCommand/MultiCommand
 
-                var p = new Process() { StartInfo = startInfo };
+                var newProc = new Process() { StartInfo = startInfo };
 
-                if (this.FollowupMode.HasFlag(FollowupModes.AppStarted)
-                    && Followup != null)
-                {
-                    if (!p.Start())
-                    {
-
-                    }
-                    if (!p.WaitForInputIdle((int)this.FollowupWaitTime.TotalMilliseconds))
-                    {
-                    }
-
-                    if (Followup.CanExecute(p.MainWindowHandle))
-                        Followup.Execute(p.MainWindowHandle); ;
-                }
-
-                p.Start();
+                newProc.Start();
             }
         }
 
@@ -135,24 +83,20 @@ namespace WindSlicer.Commands.General
             return Path.GetFileNameWithoutExtension(FileLocation);
         }
 
-        private IntPtr? GetPreferredWindow(Process process)
+        private IntPtr GetPreferredWindowHandle(Process process)
         {
-            if (string.IsNullOrEmpty(WindowClassName))
+            if (!string.IsNullOrEmpty(WindowClassName))
             {
-                return null;
-            }
-
-            var handles = NativeMethods.EnumerateProcessWindowHandles(process);
-
-            foreach (var hwnd in handles)
-            {
-                if (NativeMethods.GetClassName(hwnd) == this.WindowClassName)
+                foreach (var hwnd in NativeApi.EnumerateProcessWindowHandles(process))
                 {
-                    return hwnd;
+                    if (NativeApi.GetClassName(hwnd) == this.WindowClassName)
+                    {
+                        return hwnd;
+                    }
                 }
             }
 
-            return null;
+            return process.MainWindowHandle;
         }
     }
 }

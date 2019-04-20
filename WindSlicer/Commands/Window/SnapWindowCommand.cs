@@ -71,8 +71,8 @@ namespace WindSlicer.Commands.Window
             IntPtr hWnd = (IntPtr)parameter;
             NativeMethods.ShowWindow(hWnd, (int)ShowWindowCommands.Normal);
 
-            if (NativeMethods.GetWindowPosition(hWnd) is NativeMethods.RECT rectWindow &&
-                NativeMethods.GetWin10Bounds(hWnd) is NativeMethods.RECT rectFixed)
+            if (NativeApi.GetWindowPosition(hWnd) is NativeMethods.RECT rectWindow &&
+                NativeApi.GetWin10Bounds(hWnd) is NativeMethods.RECT rectFixed)
             {
                 // Get difference of normal and real bounds to apply to SetWindowPos
                 // which uses normal coordinates

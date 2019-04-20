@@ -46,7 +46,7 @@ namespace WindSlicer.Commands.Window
             // Un-maximize first, or SetWindowPos won't work
             NativeMethods.ShowWindow(hWnd, (int)ShowWindowCommands.Normal);
 
-            if (NativeMethods.GetWindowPosition(hWnd) is NativeMethods.RECT rect)
+            if (NativeApi.GetWindowPosition(hWnd) is NativeMethods.RECT rect)
             {
                 int top = (int)SpecialWindowHandles.HWND_TOP;
                 int noSize = (int)SetWindowPosFlags.SWP_NOSIZE;

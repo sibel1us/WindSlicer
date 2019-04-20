@@ -24,10 +24,10 @@ namespace WindSlicer.Commands.General
 
         public FolderCommand(string path)
         {
-            this.Directory = this.GetPathFromParameter(path);
+            this.Directory = this.GetFullPathFromParameter(path);
         }
 
-        protected virtual string GetPathFromParameter(string path)
+        protected virtual string GetFullPathFromParameter(string path)
         {
             return Path.GetFullPath(path);
         }
@@ -47,7 +47,7 @@ namespace WindSlicer.Commands.General
                     {
                         IntPtr hwnd = (IntPtr)window.HWND;
 
-                        NativeMethods.RestoreAndShowWindow(hwnd);
+                        NativeApi.RestoreAndShowWindow(hwnd);
 
                         bool shown = NativeMethods.SetForegroundWindow(hwnd);
 

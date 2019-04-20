@@ -55,7 +55,7 @@ namespace WindSlicer.Commands
             canExec =
                 hwnd != IntPtr.Zero &&
                 hwnd != NativeMethods.GetDesktopWindow() &&
-                NativeMethods.GetOpenWindowHandles().Contains(hwnd);
+                NativeApi.GetOpenWindowHandles().Contains(hwnd);
         }
     }
 }

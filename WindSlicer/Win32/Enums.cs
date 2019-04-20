@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace WindSlicer.Win32
 {
+    /*
+        Source(s) for the enum value names and descriptions:
+        - pinvoke.net
+        - Microsoft's own documentation.
+    */
+
     public enum ShowWindowCommands
     {
         /// <summary>

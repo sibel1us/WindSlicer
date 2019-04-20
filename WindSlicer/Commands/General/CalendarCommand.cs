@@ -3,10 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WindSlicer.Utilities.Extensions;
 using WindSlicer.Win32;
 
 namespace WindSlicer.Commands.General
 {
+    /// <summary>
+    /// Sends a click event to the calendar to show it. Does not work on Windows 10.
+    /// </summary>
+    /// <remarks>
+    /// Windows 10 limits messages sent to system processes, so this command does not work.
+    /// </remarks>
     public class CalendarCommand : BaseCommand
     {
         private const uint WM_NCLBUTTONDOWN = 0x00A1;
@@ -23,9 +30,9 @@ namespace WindSlicer.Commands.General
             IntPtr trayhwnd = NativeMethods.FindWindow("Shell_TrayWnd", "");
             IntPtr trayNotify = NativeMethods.FindWindowEx(trayhwnd, IntPtr.Zero, "TrayNotifyWnd", "");
             IntPtr clockHwnd = IntPtr.Zero;
-            foreach (IntPtr childHwnd in NativeMethods.GetChildWindows(trayhwnd))
+            foreach (IntPtr childHwnd in NativeApi.GetChildWindows(trayhwnd))
             {
-                if (NativeMethods.GetClassName(childHwnd) == "TrayClockWClass")
+                if (NativeApi.GetClassName(childHwnd) == "TrayClockWClass")
                 {
                     clockHwnd = childHwnd;
                     break;
@@ -33,15 +40,10 @@ namespace WindSlicer.Commands.General
             }
 
             if (clockHwnd == IntPtr.Zero)
-            {
                 return;
-            }
 
-            // this doesn't work in win10 for one reason or another ?
-            if (!(NativeMethods.GetWindowPosition(clockHwnd) is NativeMethods.RECT rect))
-            {
+            if (!(NativeApi.GetWindowPosition(clockHwnd) is NativeMethods.RECT rect))
                 return;
-            }
 
             IntPtr wParam = new IntPtr(HTCAPTION);
             IntPtr lParam = new IntPtr(rect.Top << 16 | rect.Left);
