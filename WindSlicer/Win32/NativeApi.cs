@@ -156,7 +156,7 @@ namespace WindSlicer.Win32
                     else
                     {
                         throw new InvalidCastException(
-                            "GCHandle Target could not be cast as List<IntPtr>");
+                            $"Cannot cast the handle as {nameof(List<IntPtr>)}");
                     }
 
                 },
@@ -228,9 +228,10 @@ namespace WindSlicer.Win32
 
             var sb = new StringBuilder(length);
 
-            return (GetWindowText(hWnd, sb, length + 1) != 0)
-                ? sb.ToString()
-                : null;
+            if (GetWindowText(hWnd, sb, length + 1) != 0)
+                return sb.ToString();
+
+            return null;
         }
 
         /// <summary>
@@ -253,9 +254,11 @@ namespace WindSlicer.Win32
         {
             int capacity = 1024;
             var sb = new StringBuilder(capacity);
-            return QueryFullProcessImageName(hproc, 0, sb, ref capacity)
-                ? sb.ToString(0, capacity)
-                : null;
+
+            if (QueryFullProcessImageName(hproc, 0, sb, ref capacity))
+                return sb.ToString(0, capacity);
+
+            return null;
         }
 
         /// <summary>
@@ -268,7 +271,12 @@ namespace WindSlicer.Win32
             return 0 != (GetAsyncKeyState(vKey) & 0x8000);
         }
 
-        public static List<IntPtr> EnumerateProcessWindowHandles(Process process)
+        /// <summary>
+        /// Returns a list of windows that run in threads of the process.
+        /// </summary>
+        /// <param name="process"></param>
+        /// <returns></returns>
+        public static List<IntPtr> GetProcessWindows(Process process)
         {
             var handles = new List<IntPtr>();
 

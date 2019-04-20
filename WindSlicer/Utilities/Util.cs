@@ -15,6 +15,10 @@ namespace WindSlicer.Utilities
         /// <summary>
         /// Get all defined values of <typeparamref name="T"/> using <see
         /// cref="Enum.GetValues(Type)"/>.
+        /// <para>
+        /// Note that the underlying value of the enum can have multiple definitions, so use <see
+        /// cref="Enumerable.Distinct{TSource}(IEnumerable{TSource})"/> if needed.
+        /// </para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>

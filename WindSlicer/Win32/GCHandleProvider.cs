@@ -10,7 +10,9 @@ namespace WindSlicer.Win32
     /// <summary>
     /// Use to get IntPtr from a managed object.
     /// </summary>
-    /// source: https://stackoverflow.com/a/52103996/
+    /// <remarks>
+    /// Source: https://stackoverflow.com/a/52103996/
+    /// </remarks>
     public class GCHandleProvider : IDisposable
     {
         public GCHandleProvider(object target)

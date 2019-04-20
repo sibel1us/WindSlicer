@@ -14,6 +14,7 @@ namespace WindSlicer.Commands.General
     /// <remarks>
     /// Windows 10 limits messages sent to system processes, so this command does not work.
     /// </remarks>
+    [Obsolete("Does not work on Windows 10.", error: false)]
     public class CalendarCommand : BaseCommand
     {
         private const uint WM_NCLBUTTONDOWN = 0x00A1;

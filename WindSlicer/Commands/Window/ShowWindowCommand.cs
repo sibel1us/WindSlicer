@@ -10,7 +10,7 @@ namespace WindSlicer.Commands.Window
     /// <summary>
     /// Command to bring a window to the foreground.
     /// </summary>
-    [Obsolete]
+    [Obsolete("Window showing as a WindowCommand makes no sense semantically.", error: true)]
     public class ShowWindowCommand : WindowCommand
     {
         /// <summary>

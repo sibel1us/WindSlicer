@@ -6,6 +6,7 @@ namespace WindSlicer.Commands.Window
     /// <summary>
     /// Command to move a window by an offset without resizing it.
     /// </summary>
+    [Obsolete("Moving windows will be a separate function from commands.", error: false)]
     public class MoveWindowCommand : WindowCommand
     {
         /// <summary>
@@ -32,7 +33,7 @@ namespace WindSlicer.Commands.Window
             }
 
             this.DeltaX = deltaX;
-            this.DeltaY = DeltaY;
+            this.DeltaY = deltaY;
         }
 
         /// <summary>

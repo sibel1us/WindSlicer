@@ -25,6 +25,7 @@ namespace WindSlicer.Utilities.Converters
         {
             if (value is BaseCommand cmd && IconProvider.GetIcon(cmd) is Icon ico)
             {
+                // TODO: cache the bitmaps in IconProvider or such
                 return Imaging.CreateBitmapSourceFromHIcon(
                     ico.Handle,
                     Int32Rect.Empty,

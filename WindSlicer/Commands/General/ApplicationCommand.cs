@@ -87,7 +87,7 @@ namespace WindSlicer.Commands.General
         {
             if (!string.IsNullOrEmpty(WindowClassName))
             {
-                foreach (var hwnd in NativeApi.EnumerateProcessWindowHandles(process))
+                foreach (var hwnd in NativeApi.GetProcessWindows(process))
                 {
                     if (NativeApi.GetClassName(hwnd) == this.WindowClassName)
                     {

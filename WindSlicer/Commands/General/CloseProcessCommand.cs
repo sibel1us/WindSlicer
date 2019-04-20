@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace WindSlicer.Commands.General
 {
+    [Obsolete("Shutting down processes is not in the scope of a window manager.", error: false)]
     public class CloseProcessCommand : BaseCommand
     {
         public string ProcessName { get; set; }

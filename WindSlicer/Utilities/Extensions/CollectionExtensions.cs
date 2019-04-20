@@ -41,6 +41,18 @@ namespace WindSlicer.Utilities.Extensions
             }
         }
 
+        /// <summary>
+        /// Attempts to retrieve the first item in the collection based on a predicate.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="predicate"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Use with inline parameters to reduce visual clutter and null checks that result from
+        /// using FirstOfDefault.
+        /// </remarks>
         public static bool TryGetFirst<T>(
             this IEnumerable<T> @this,
             Func<T, bool> predicate,
