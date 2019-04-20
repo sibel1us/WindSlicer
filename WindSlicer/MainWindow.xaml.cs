@@ -27,15 +27,6 @@ namespace WindSlicer
     public partial class MainWindow : Window
     {
         private readonly KeyboardHook hook;
-        private IntPtr _handle = IntPtr.Zero;
-
-        /// <summary>
-        /// Handle for this window.
-        /// </summary>
-        private IntPtr Handle =>
-            (_handle == IntPtr.Zero)
-            ? (_handle = new WindowInteropHelper(this).Handle)
-            : _handle;
 
         public bool Minimized => this.WindowState == WindowState.Minimized;
 
@@ -50,6 +41,7 @@ namespace WindSlicer
 
             this.hook = new KeyboardHook();
             this.InitHotkeys();
+
             //InitTrayIcon();
 
             this.CmdWindow = new CommandWindow();
@@ -59,7 +51,6 @@ namespace WindSlicer
 
         private void InitHotkeys()
         {
-            this.hook.RegisterHotKey(ModifierKeys.Alt, System.Windows.Forms.Keys.OemBackslash);
             this.hook.RegisterHotKey(ModifierKeys.Control, System.Windows.Forms.Keys.OemBackslash);
             this.hook.KeyPressed += (_, args) =>
             {
@@ -110,7 +101,8 @@ namespace WindSlicer
             {
                 if (mul == 8)
                     return scr;
-                return (int)Math.Round((scr * mul) / 8d);
+
+                return (int)Math.Round(scr * mul / 8d);
             }
 
             bool snapsDefined = (this.Commands != null);
@@ -129,7 +121,6 @@ namespace WindSlicer
                 }
 
                 string locSkype = @"C:\Program Files\Microsoft Office\Office16\lync.exe";
-                string locTeams = @"C:\Users\Sipi Ovaska\AppData\Local\Microsoft\Teams\current\Teams.exe";
                 string locOutlook = @"C:\Program Files\Microsoft Office\Office16\OUTLOOK.EXE";
                 string locNpp = @"C:\Program Files\Notepad++\notepad++.exe";
 
@@ -138,10 +129,8 @@ namespace WindSlicer
                 this.Commands.Add(new KeyChord(Key.K, Key.M), new MaximizeWindowCommand());
                 this.Commands.Add(new KeyChord(Key.K, Key.N), new MinimizeWindowCommand());
                 this.Commands.Add(new KeyPress(Key.S), new ApplicationCommand(locSkype) { WindowClassName = "CommunicatorMainWindowClass" });
-                this.Commands.Add(new KeyPress(Key.T), new ApplicationCommand(locTeams));
                 this.Commands.Add(new KeyPress(Key.O), new ApplicationCommand(locOutlook));
                 this.Commands.Add(new KeyPress(Key.N), new ApplicationCommand(locNpp));
-                this.Commands.Add(new KeyPress(Key.W), new FolderCommand(@"C:\Work"));
                 this.Commands.Add(new KeyPress(Key.L), new SpecialFolderCommand(Environment.SpecialFolder.MyComputer));
                 this.Commands.Add(new KeyPress(Key.D), new SpecialFolderCommand(Environment.SpecialFolder.MyDocuments));
                 this.Commands.Add(new KeyPress(Key.P), new SpecialFolderCommand(Environment.SpecialFolder.MyPictures));
