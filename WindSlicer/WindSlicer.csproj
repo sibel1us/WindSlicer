@@ -97,6 +97,12 @@
     <Compile Include="CommandWindow.xaml.cs">
       <DependentUpon>CommandWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LayoutForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LayoutForm.Designer.cs">
+      <DependentUpon>LayoutForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Utilities\Converters\CanExecuteToBooleanConverter.cs" />
     <Compile Include="Utilities\Converters\CommandToImageConverter.cs" />
     <Compile Include="Utilities\Error.cs" />

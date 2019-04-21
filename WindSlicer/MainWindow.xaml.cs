@@ -55,6 +55,7 @@ namespace WindSlicer
 
         private void InitHotkeys()
         {
+            this.kbHook.RegisterHotKey(ModifierKeys.Alt, System.Windows.Forms.Keys.OemBackslash);
             this.kbHook.RegisterHotKey(ModifierKeys.Control, System.Windows.Forms.Keys.OemBackslash);
             this.kbHook.KeyPressed += (_, args) =>
             {
@@ -62,23 +63,60 @@ namespace WindSlicer
                 {
                     this.ShowSnapWindow();
                 }
+                else if (args.Modifier==ModifierKeys.Alt)
+                {
+                    Application.Current.Shutdown();
+                }
             };
         }
 
         private void InitDragHook()
         {
-            //this.dragHook.Subscribe();
-            //this.dragHook.WindowDragged += (_, args) =>
-            //{
-            //    if (!args.DragEnded)
-            //    {
-            //        System.Media.SystemSounds.Asterisk.Play();
-            //    }
-            //    else
-            //    {
-            //        System.Media.SystemSounds.Asterisk.Play();
-            //    }
-            //};
+            System.Windows.Forms.Form form = new LayoutForm();
+
+            this.dragHook.Subscribe();
+            this.dragHook.WindowDragged += (_, args) =>
+            {
+                if (args.DragStarted)
+                {
+
+                    //var hwnd = new WindowInteropHelper(layout).Handle;
+                    //var ret = NativeMethods.SetWindowPos(hwnd,
+                    //    (int)SpecialWindowHandles.HWND_TOP
+                    //    , 0, 0, 0, 0,
+                    //    (int)(SetWindowPosFlags.SWP_NOSIZE |
+                    //    SetWindowPosFlags.SWP_NOMOVE |
+                    //    SetWindowPosFlags.SWP_SHOWWINDOW));
+
+                    //Console.WriteLine(ret + " " + hwnd);
+
+                    //using (var dc = new DeviceContext(IntPtr.Zero))
+                    //using (var gfx = dc.GetGraphics())
+                    //{
+                    //    var ctx = BufferedGraphicsManager.Current;
+                    //    ctx.MaximumBuffer = new System.Drawing.Size(600, 600);
+
+                    //    using (var bgfx = ctx.Allocate(gfx, new Rectangle(0, 0, 600, 600)))
+                    //    {
+                    //        bgfx.Graphics.FillRectangle(
+                    //            System.Drawing.Brushes.Red,
+                    //            0, 0, 600, 600);
+                    //    }
+                    //}
+
+                    form.Show();
+
+                    NativeMethods.SetWindowPos(
+                        form.Handle, (int)SpecialWindowHandles.HWND_TOPMOST,
+                        0, 0, 0, 0,
+                        (int)(SetWindowPosFlags.SWP_NOMOVE |
+                        SetWindowPosFlags.SWP_NOSIZE | SetWindowPosFlags.SWP_NOACTIVATE));
+                }
+                else
+                {
+                    form.Hide();
+                }
+            };
         }
 
         private void InitTrayIcon()
