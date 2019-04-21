@@ -14,7 +14,7 @@ namespace WindSlicer.Win32.Hooks
         private const uint WINEVENT_OUTOFCONTEXT = 0;
         private const uint EVENT_OBJECT_LOCATIONCHANGE = 0x800B;
 
-        public IntPtr HWnd { get; }
+        public IntPtr HWnd { get; set; }
         protected override IntPtr HWinEventHook { get; set; }
         protected override NativeMethods.WinEventDelegate EventDelegate { get; }
 
@@ -26,8 +26,11 @@ namespace WindSlicer.Win32.Hooks
 
         public override void Subscribe()
         {
+            if (this.HWnd == IntPtr.Zero)
+                Error.InvalidOp("Target window handle not set.");
+
             if (this.HWinEventHook != IntPtr.Zero)
-                Error.InvalidOp("Already subscribed");
+                Error.InvalidOp("Already subscribed.");
 
             int threadId = NativeMethods.GetWindowThreadProcessId(this.HWnd, out int processId);
 

@@ -99,11 +99,13 @@
     </Compile>
     <Compile Include="Utilities\Converters\CanExecuteToBooleanConverter.cs" />
     <Compile Include="Utilities\Converters\CommandToImageConverter.cs" />
+    <Compile Include="Utilities\Error.cs" />
     <Compile Include="Utilities\LazyDictionary.cs" />
     <Compile Include="Utilities\Util.cs" />
     <Compile Include="Utilities\Extensions\CollectionExtensions.cs" />
     <Compile Include="Utilities\IconProvider.cs" />
     <Compile Include="Utilities\InlineComparer.cs" />
+    <Compile Include="Win32\DeviceContext.cs" />
     <Compile Include="Win32\Enums.cs" />
     <Compile Include="Win32\GCHandleProvider.cs" />
     <Compile Include="Win32\Hooks\DragWindowHook.cs" />
