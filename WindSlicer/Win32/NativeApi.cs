@@ -118,17 +118,14 @@ namespace WindSlicer.Win32
 
         public static RECT? GetWin10Bounds(IntPtr hWnd)
         {
-            // TODO: check error code
-            DwmGetWindowAttribute(
+            int retVal = DwmGetWindowAttribute(
                 hWnd,
                 DwmWindowAttribute.DWMWA_EXTENDED_FRAME_BOUNDS,
-                out RECT outVal,
-                Marshal.SizeOf(typeof(RECT)));
+                out RECT outRect,
+                Marshal.SizeOf<RECT>());
 
-            if (outVal is RECT rect)
-            {
-                return rect;
-            }
+            if (retVal == 0)
+                return outRect;
 
             return null;
         }
@@ -146,6 +143,7 @@ namespace WindSlicer.Win32
             {
                 EnumChildWindows(parentHwnd, delegate (IntPtr childHwnd, int pointer)
                 {
+                    // TODO: check if handle needs to be freed
                     var gcHandle = GCHandle.FromIntPtr(new IntPtr(pointer));
 
                     if (gcHandle.Target is List<IntPtr> list)
