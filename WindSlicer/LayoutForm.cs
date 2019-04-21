@@ -13,6 +13,11 @@ namespace WindSlicer
 {
     public partial class LayoutForm : Form
     {
+        private Rectangle[] rectangles;
+        public IEnumerable<Rectangle> SnapLayout => rectangles.AsEnumerable();
+
+        private readonly Pen pen = new Pen(Brushes.Red, 8f);
+
         protected override bool ShowWithoutActivation => true;
 
         protected override CreateParams CreateParams
@@ -30,17 +35,39 @@ namespace WindSlicer
 
         public LayoutForm()
         {
+            this.rectangles = new Rectangle[0];
             InitializeComponent();
         }
 
         protected override void OnLoad(EventArgs e)
         {
-            this.Opacity = .5;
+            this.DoubleBuffered = true;
             this.FormBorderStyle = FormBorderStyle.None;
-            this.Left = Screen.PrimaryScreen.WorkingArea.Bottom;
+
+            this.Opacity = 0.8;
+            this.TransparencyKey = Color.Cyan;
+            this.BackColor = Color.Cyan;
+
             this.Bounds = Screen.PrimaryScreen.WorkingArea;
-            this.Top = Screen.PrimaryScreen.WorkingArea.Top;
+
             base.OnLoad(e);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            e.Graphics.DrawRectangles(this.pen, this.rectangles);
+            base.OnPaint(e);
+        }
+
+        public void SetLayout(Rectangle[] areas)
+        {
+            rectangles = areas;
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            pen.Dispose();
+            base.OnFormClosed(e);
         }
     }
 }

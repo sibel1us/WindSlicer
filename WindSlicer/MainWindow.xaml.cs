@@ -63,7 +63,7 @@ namespace WindSlicer
                 {
                     this.ShowSnapWindow();
                 }
-                else if (args.Modifier==ModifierKeys.Alt)
+                else if (args.Modifier == ModifierKeys.Alt)
                 {
                     Application.Current.Shutdown();
                 }
@@ -72,7 +72,28 @@ namespace WindSlicer
 
         private void InitDragHook()
         {
-            System.Windows.Forms.Form form = new LayoutForm();
+            var mon = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
+
+            Rectangle transform(Rectangle rect)
+            {
+                return new Rectangle(
+                    (rect.X * mon.Width) / 8 + 16,
+                    (rect.Y * mon.Height) / 8 + 16,
+                    (rect.Width * mon.Width) / 8 - 32,
+                    (rect.Height * mon.Height) / 8 - 32);
+            }
+
+            var rekts = new Rectangle[]
+            {
+                new Rectangle(0, 0, 5, 8),
+                new Rectangle(5, 0, 3, 4),
+                new Rectangle(5, 4, 3, 4),
+            }
+            .Select(x => transform(x))
+            .ToArray();
+
+            var form = new LayoutForm();
+            form.SetLayout(rekts);
 
             this.dragHook.Subscribe();
             this.dragHook.WindowDragged += (_, args) =>
