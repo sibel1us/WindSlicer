@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
+using WindSlicer.Utilities;
 
 namespace WindSlicer.Win32.Hooks
 {
@@ -28,7 +29,7 @@ namespace WindSlicer.Win32.Hooks
         /// </summary>
         private class HookedWindow : NativeWindow, IDisposable
         {
-            private const int WM_HOTKEY = 0x0312;
+            private static readonly int WM_HOTKEY = (int)WM.HOTKEY;
 
             public HookedWindow()
             {
@@ -83,11 +84,7 @@ namespace WindSlicer.Win32.Hooks
             this.currentId += 1;
 
             if (!RegisterHotKey(this.hookedWindow.Handle, this.currentId, (uint)modifier, (uint)key))
-            {
-                throw new InvalidOperationException(
-                    "Couldn't register the hotkey.",
-                    NativeApi.LastError);
-            }
+                Error.Win32("RegisterHotKey failed");
         }
 
         public event EventHandler<KeyPressedEventArgs> KeyPressed;

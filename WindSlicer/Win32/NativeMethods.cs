@@ -252,7 +252,7 @@ namespace WindSlicer.Win32
             EnumThreadDelegate lpfn,
             IntPtr lParam);
 
-        [DllImport("user32.dll")]
+        [DllImport("user32.dll", SetLastError = true)]
         internal static extern int GetWindowThreadProcessId(IntPtr hWnd, out int processId);
 
         [DllImport("kernel32.dll", SetLastError = true)]

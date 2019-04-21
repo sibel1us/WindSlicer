@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WindSlicer.Utilities;
 
 namespace WindSlicer.Win32.Hooks
 {
@@ -25,7 +26,7 @@ namespace WindSlicer.Win32.Hooks
         public override void Subscribe()
         {
             if (this.HWinEventHook != IntPtr.Zero)
-                throw new InvalidOperationException("Already subscribed");
+                Error.InvalidOp("Already subscribed.");
 
             this.HWinEventHook = NativeMethods.SetWinEventHook(
                 EVENT_SYSTEM_MOVESIZESTART,
@@ -37,7 +38,7 @@ namespace WindSlicer.Win32.Hooks
                 WINEVENT_OUTOFCONTEXT);
 
             if (this.HWinEventHook == IntPtr.Zero)
-                throw NativeApi.LastError;
+                Error.Win32("SetWinEventHook failed");
         }
 
         protected override void WinEventProc(
@@ -54,11 +55,11 @@ namespace WindSlicer.Win32.Hooks
 
             if (eventType == EVENT_SYSTEM_MOVESIZESTART)
             {
-                WindowDragged?.Invoke(null, new WindowDraggedEventArgs(hwnd, false));
+                WindowDragged?.Invoke(null, new WindowDraggedEventArgs(hwnd, true));
             }
             else if (eventType == EVENT_SYSTEM_MOVESIZEEND)
             {
-                WindowDragged?.Invoke(null, new WindowDraggedEventArgs(hwnd, true));
+                WindowDragged?.Invoke(null, new WindowDraggedEventArgs(hwnd, false));
             }
         }
 
@@ -81,12 +82,12 @@ namespace WindSlicer.Win32.Hooks
         /// <summary>
         /// Whether the drag ended or started.
         /// </summary>
-        public bool DragEnded { get; }
+        public bool DragStarted { get; }
 
-        public WindowDraggedEventArgs(IntPtr hwnd, bool dragEnded)
+        public WindowDraggedEventArgs(IntPtr hwnd, bool dragStarted)
         {
             this.HWnd = hwnd;
-            this.DragEnded = dragEnded;
+            this.DragStarted = dragStarted;
         }
     }
 }
