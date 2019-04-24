@@ -100,31 +100,6 @@ namespace WindSlicer
             {
                 if (args.DragStarted)
                 {
-
-                    //var hwnd = new WindowInteropHelper(layout).Handle;
-                    //var ret = NativeMethods.SetWindowPos(hwnd,
-                    //    (int)SpecialWindowHandles.HWND_TOP
-                    //    , 0, 0, 0, 0,
-                    //    (int)(SetWindowPosFlags.SWP_NOSIZE |
-                    //    SetWindowPosFlags.SWP_NOMOVE |
-                    //    SetWindowPosFlags.SWP_SHOWWINDOW));
-
-                    //Console.WriteLine(ret + " " + hwnd);
-
-                    //using (var dc = new DeviceContext(IntPtr.Zero))
-                    //using (var gfx = dc.GetGraphics())
-                    //{
-                    //    var ctx = BufferedGraphicsManager.Current;
-                    //    ctx.MaximumBuffer = new System.Drawing.Size(600, 600);
-
-                    //    using (var bgfx = ctx.Allocate(gfx, new Rectangle(0, 0, 600, 600)))
-                    //    {
-                    //        bgfx.Graphics.FillRectangle(
-                    //            System.Drawing.Brushes.Red,
-                    //            0, 0, 600, 600);
-                    //    }
-                    //}
-
                     form.Show();
 
                     NativeMethods.SetWindowPos(
@@ -132,9 +107,12 @@ namespace WindSlicer
                         0, 0, 0, 0,
                         (int)(SetWindowPosFlags.SWP_NOMOVE |
                         SetWindowPosFlags.SWP_NOSIZE | SetWindowPosFlags.SWP_NOACTIVATE));
+
+                    form.SetEnabled(true);
                 }
                 else
                 {
+                    form.SetEnabled(false);
                     form.Hide();
                 }
             };

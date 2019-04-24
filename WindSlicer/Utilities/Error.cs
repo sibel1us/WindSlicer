@@ -23,5 +23,10 @@ namespace WindSlicer.Utilities
         {
             throw new InvalidOperationException(message ?? def);
         }
+
+        public static void OutOfRange(string message = null)
+        {
+            throw new IndexOutOfRangeException(message ?? def);
+        }
     }
 }
