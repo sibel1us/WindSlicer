@@ -55,6 +55,16 @@ namespace WindSlicer.Win32
             public UIntPtr dwExtraInfo;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct KBDLLHookStruct
+        {
+            public int vkCode;
+            public int scanCode;
+            public int flags;
+            public int time;
+            public int dwExtraInfo;
+        }
+
         #endregion Structs
 
         #region Hooks and Keyboard
@@ -89,6 +99,9 @@ namespace WindSlicer.Win32
             HookProc lpfn,
             IntPtr hMod,
             uint dwThreadId);
+
+        [DllImport("user32", SetLastError = true)]
+        public static extern bool UnhookWindowsHookEx(IntPtr hHook);
 
         /// <summary>
         /// Passes the hook information to the next hook procedure in the current hook chain. A hook

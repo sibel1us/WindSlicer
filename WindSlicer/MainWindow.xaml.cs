@@ -27,8 +27,9 @@ namespace WindSlicer
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly KeyboardHook kbHook;
+        private readonly HotkeyHook hkHook;
         private readonly DragWindowHook dragHook;
+        private readonly KeyboardHook kbHook;
 
         public bool Minimized => this.WindowState == WindowState.Minimized;
 
@@ -41,7 +42,7 @@ namespace WindSlicer
         {
             this.InitializeComponent();
 
-            this.kbHook = new KeyboardHook();
+            this.hkHook = new HotkeyHook();
             this.InitHotkeys();
 
             this.dragHook = new DragWindowHook();
@@ -50,14 +51,23 @@ namespace WindSlicer
             //InitTrayIcon();
             this.CmdWindow = new CommandWindow();
 
+
+
+            this.kbHook = new KeyboardHook(false);
+            kbHook.Subscribe(System.Windows.Forms.Keys.LMenu);
+            kbHook.KeyChanged += (_, args) =>
+            {
+                Console.WriteLine(args.Key + ", Pressed: " + args.KeyDown);
+            };
+
             this.Hide();
         }
 
         private void InitHotkeys()
         {
-            this.kbHook.RegisterHotKey(ModifierKeys.Alt, System.Windows.Forms.Keys.OemBackslash);
-            this.kbHook.RegisterHotKey(ModifierKeys.Control, System.Windows.Forms.Keys.OemBackslash);
-            this.kbHook.KeyPressed += (_, args) =>
+            this.hkHook.RegisterHotKey(ModifierKeys.Alt, System.Windows.Forms.Keys.OemBackslash);
+            this.hkHook.RegisterHotKey(ModifierKeys.Control, System.Windows.Forms.Keys.OemBackslash);
+            this.hkHook.KeyPressed += (_, args) =>
             {
                 if (args.Modifier == ModifierKeys.Control)
                 {
@@ -206,8 +216,9 @@ namespace WindSlicer
         {
             if (!e.Cancel)
             {
-                this.kbHook.Dispose();
+                this.hkHook.Dispose();
                 this.dragHook.Dispose();
+                this.kbHook.Dispose();
             }
         }
     }
