@@ -139,27 +139,11 @@ namespace WindSlicer.Win32
         {
             var result = new List<IntPtr>();
 
-            using (var gchProvider = new GCHandleProvider(result))
+            EnumChildWindows(parentHwnd, delegate (IntPtr childHwnd, int pointer)
             {
-                EnumChildWindows(parentHwnd, delegate (IntPtr childHwnd, int pointer)
-                {
-                    // TODO: check if handle needs to be freed
-                    var gcHandle = GCHandle.FromIntPtr(new IntPtr(pointer));
-
-                    if (gcHandle.Target is List<IntPtr> list)
-                    {
-                        list.Add(childHwnd);
-                        return true;
-                    }
-                    else
-                    {
-                        throw new InvalidCastException(
-                            $"Cannot cast the handle as {nameof(List<IntPtr>)}");
-                    }
-
-                },
-                gchProvider.Pointer);
-            }
+                result.Add(childHwnd);
+                return true;
+            }, IntPtr.Zero);
 
             return result;
         }
