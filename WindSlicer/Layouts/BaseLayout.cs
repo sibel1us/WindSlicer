@@ -66,17 +66,15 @@ namespace WindSlicer.Layouts
 
         public IEnumerable<Rectangle> GetLayout(Rectangle screen)
         {
-            throw new NotImplementedException();
+            return this.GetLayout(screen, 0);
         }
 
-        public IEnumerable<Rectangle> GetLayout(Rectangle screen, int index)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract IEnumerable<Rectangle> GetLayout(Rectangle screen, int index);
 
         public IEnumerable<IEnumerable<Rectangle>> GetLayouts(Rectangle screen)
         {
-            throw new NotImplementedException();
+            return Enumerable.Range(0, this.items.Count)
+                .Select(i => this.GetLayout(screen, i));
         }
 
         public void Remove(int layer, int index)

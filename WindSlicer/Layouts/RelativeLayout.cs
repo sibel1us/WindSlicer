@@ -19,6 +19,15 @@ namespace WindSlicer.Layouts
             }
         }
 
+        public override IEnumerable<Rectangle> GetLayout(Rectangle screen, int index)
+        {
+            return this.items.ElementAt(index).Select(r => new Rectangle(
+                (int)Math.Round(r.X * screen.Width),
+                (int)Math.Round(r.Y * screen.Height),
+                (int)Math.Round(r.Width * screen.Width),
+                (int)Math.Round(r.Height * screen.Height)));
+        }
+
         public PixelLayout ToPixelLayout(Rectangle area)
         {
             var layout = new PixelLayout(area);

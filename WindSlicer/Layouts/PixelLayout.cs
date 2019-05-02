@@ -30,6 +30,14 @@ namespace WindSlicer.Layouts
 
         }
 
+        public override IEnumerable<Rectangle> GetLayout(Rectangle screen, int index)
+        {
+            if (!screen.Equals(this.Area))
+                return new Rectangle[0];
+
+            return this.items.ElementAt(index).Select(r => Rectangle.Round(r));
+        }
+
         /// <summary>
         /// 
         /// </summary>
