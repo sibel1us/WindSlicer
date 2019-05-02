@@ -13,10 +13,10 @@ namespace WindSlicer.Layouts
         int Count { get; }
         int Layers { get; }
 
-        void Add(Rectangle area);
-        void Add(Rectangle area, int layer);
+        void Add(RectangleF area);
+        void Add(RectangleF area, int layer);
         void AddLayer();
-        void AddLayer(params Rectangle[] areas);
+        void AddLayer(params RectangleF[] areas);
 
         void Remove(int layer, int index);
         void RemoveLayer(int layer);

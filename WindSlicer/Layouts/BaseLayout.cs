@@ -11,12 +11,12 @@ namespace WindSlicer.Layouts
 {
     public abstract class BaseLayout : IWindowLayout
     {
-        protected List<List<Rectangle>> items;
+        protected List<List<RectangleF>> items;
 
         public int Count => this.items.Sum(x => x.Count);
         public int Layers => this.items.Count();
 
-        protected virtual void Validate(Rectangle area, int layer)
+        protected virtual void Validate(RectangleF area, int layer)
         {
             if (area.IsEmpty)
             {
@@ -29,19 +29,20 @@ namespace WindSlicer.Layouts
                     $"Layer index {layer} out of range, must be in 0...{this.items.Count}");
             }
 
-            if (this.items[layer].Any(r => r.IntersectsWith(area)))
+            if (this.items[layer]
+                .TryGetFirst(r => r.IntersectsWith(area), out RectangleF old))
             {
-                Error.InvalidOp($"Space is already reserved, cannot add {area}");
+                Error.InvalidOp($"New area {area} intersects with {old}");
             }
         }
 
-        public void Add(Rectangle area)
+        public void Add(RectangleF area)
         {
             this.Validate(area, 0);
             this.items[0].Add(area);
         }
 
-        public void Add(Rectangle area, int layer)
+        public void Add(RectangleF area, int layer)
         {
             this.Validate(area, layer);
             this.items[layer].Add(area);
@@ -49,10 +50,10 @@ namespace WindSlicer.Layouts
 
         public void AddLayer()
         {
-            items.Add(new List<Rectangle>());
+            items.Add(new List<RectangleF>());
         }
 
-        public void AddLayer(params Rectangle[] areas)
+        public void AddLayer(params RectangleF[] areas)
         {
             this.items.Add(areas.ToList());
         }
@@ -60,7 +61,7 @@ namespace WindSlicer.Layouts
         public void Clear()
         {
             this.items.Clear();
-            this.items.Add(new List<Rectangle>());
+            this.items.Add(new List<RectangleF>());
         }
 
         public IEnumerable<Rectangle> GetLayout(Rectangle screen)

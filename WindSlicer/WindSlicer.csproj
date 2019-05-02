@@ -103,6 +103,10 @@
     <Compile Include="LayoutForm.Designer.cs">
       <DependentUpon>LayoutForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Layouts\BaseLayout.cs" />
+    <Compile Include="Layouts\IWindowLayout.cs" />
+    <Compile Include="Layouts\PixelLayout.cs" />
+    <Compile Include="Layouts\RelativeLayout.cs" />
     <Compile Include="Utilities\Converters\CanExecuteToBooleanConverter.cs" />
     <Compile Include="Utilities\Converters\CommandToImageConverter.cs" />
     <Compile Include="Utilities\Error.cs" />

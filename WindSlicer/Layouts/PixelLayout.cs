@@ -17,7 +17,7 @@ namespace WindSlicer.Layouts
             this.Area = area;
         }
 
-        protected override void Validate(Rectangle area, int layer)
+        protected override void Validate(RectangleF area, int layer)
         {
             base.Validate(area, layer);
 
@@ -28,6 +28,48 @@ namespace WindSlicer.Layouts
             }
 
 
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="newArea"></param>
+        /// <returns></returns>
+        public PixelLayout Transform(Rectangle newArea)
+        {
+            var layout = new PixelLayout(newArea);
+
+            var xMult = newArea.Width / this.Area.Width;
+            var yMult = newArea.Height / this.Area.Height;
+
+            foreach (var layer in this.items)
+            {
+                layout.AddLayer(layer.Select(old => new RectangleF(
+                    old.X * xMult,
+                    old.Y * yMult,
+                    old.Width * xMult,
+                    old.Height * yMult))
+                    .ToArray());
+            }
+
+            return layout;
+        }
+
+        public RelativeLayout ToRelativeLayout()
+        {
+            var layout = new RelativeLayout();
+
+            foreach (var layer in this.items)
+            {
+                layout.AddLayer(layer.Select(old => new RectangleF(
+                    old.X / this.Area.Width,
+                    old.Y / this.Area.Height,
+                    old.Width / this.Area.Width,
+                    old.Height / this.Area.Height))
+                    .ToArray());
+            }
+
+            return layout;
         }
     }
 }
