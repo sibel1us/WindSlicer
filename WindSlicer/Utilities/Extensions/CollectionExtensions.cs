@@ -41,14 +41,19 @@ namespace WindSlicer.Utilities.Extensions
             }
         }
 
+        public static void AddRange<K,V>(
+            this IDictionary<K,V> @this,
+            IEnumerable<KeyValuePair<K,V>> keyValuePairs)
+        {
+            foreach (var item in keyValuePairs)
+            {
+                @this.Add(item);
+            }
+        }
+
         /// <summary>
         /// Attempts to retrieve the first item in the collection based on a predicate.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="this"></param>
-        /// <param name="predicate"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
         /// <remarks>
         /// Use with inline parameters to reduce visual clutter and null checks that result from
         /// using FirstOfDefault.

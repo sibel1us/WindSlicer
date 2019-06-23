@@ -12,22 +12,27 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using WindSlicer.Commands;
+using WindSlicer.Services;
 
 namespace WindSlicer.Utilities.Converters
 {
     public class CommandToImageConverter : IValueConverter
     {
+        private readonly IIconService iconService = new ShellIconService();
+
         public object Convert(
             object value,
             Type targetType,
             object parameter,
             CultureInfo culture)
         {
-            if (value is BaseCommand cmd && IconProvider.GetIcon(cmd) is Icon ico)
+            if (value is BaseCommand cmd)
             {
-                // TODO: cache the bitmaps in IconProvider or such
+                var icon = iconService.GetIcon(cmd);
+
+                // TODO: cache the bitmaps in IconProvider or such?
                 return Imaging.CreateBitmapSourceFromHIcon(
-                    ico.Handle,
+                    icon.Handle,
                     Int32Rect.Empty,
                     BitmapSizeOptions.FromEmptyOptions());
             }

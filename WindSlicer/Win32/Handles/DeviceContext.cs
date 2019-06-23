@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WindSlicer.Win32
+namespace WindSlicer.Win32.Handles
 {
     /// <summary>
     /// Wrapper class for <see cref="NativeMethods.GetDC(IntPtr)"/> and <see

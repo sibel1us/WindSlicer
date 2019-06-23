@@ -17,6 +17,7 @@ using WindSlicer.Commands;
 using WindSlicer.Commands.General;
 using WindSlicer.Commands.Keys;
 using WindSlicer.Commands.Window;
+using WindSlicer.Services;
 using WindSlicer.Win32;
 using WindSlicer.Win32.Hooks;
 
@@ -50,7 +51,6 @@ namespace WindSlicer
 
             //InitTrayIcon();
             this.CmdWindow = new CommandWindow();
-
 
 
             this.kbHook = new KeyboardHook(false);

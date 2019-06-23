@@ -44,7 +44,7 @@ namespace WindSlicer.Win32
         /// <param name="hWnd"></param>
         /// <param name="newWidth"></param>
         /// <param name="newHeight"></param>
-        /// <param name="_">Anchor point of the window when resizing.</param>
+        /// <param name="alignment">Anchor point of the window when resizing.</param>
         /// <returns></returns>
         public static bool ClientResize(
             IntPtr hWnd,
@@ -52,10 +52,10 @@ namespace WindSlicer.Win32
             int newHeight,
             ContentAlignment _ = ContentAlignment.TopLeft)
         {
-            bool gotClientRect = GetClientRect(hWnd, out RECT clientRect);
-            bool gotWindowRect = GetWindowRect(hWnd, out RECT windowRect);
+            if (!GetClientRect(hWnd, out RECT clientRect))
+                return false;
 
-            if (!gotClientRect || !gotWindowRect)
+            if (!GetWindowRect(hWnd, out RECT windowRect))
                 return false;
 
             var diff = new Point(
@@ -139,11 +139,12 @@ namespace WindSlicer.Win32
         {
             var result = new List<IntPtr>();
 
-            EnumChildWindows(parentHwnd, delegate (IntPtr childHwnd, int pointer)
+            EnumChildWindows(parentHwnd, delegate (IntPtr childHwnd, int _)
             {
                 result.Add(childHwnd);
                 return true;
-            }, IntPtr.Zero);
+            },
+            IntPtr.Zero);
 
             return result;
         }
@@ -159,21 +160,21 @@ namespace WindSlicer.Win32
 
             EnumWindows(delegate (IntPtr hWnd, int lParam)
             {
-                if (hWnd == shellhWnd)
-                    return true;
-                if (!IsWindowVisible(hWnd))
+                if (hWnd == shellhWnd || !IsWindowVisible(hWnd))
                     return true;
 
                 int length = GetWindowTextLength(hWnd);
+
                 if (length == 0)
                     return true;
 
-                StringBuilder builder = new StringBuilder(length);
+                var builder = new StringBuilder(length);
                 GetWindowText(hWnd, builder, length + 1);
 
                 windows[hWnd] = builder.ToString();
                 return true;
-            }, 0);
+            },
+            0);
 
             return windows;
         }
@@ -185,18 +186,16 @@ namespace WindSlicer.Win32
 
             EnumWindows(delegate (IntPtr hWnd, int lParam)
             {
-                if (hWnd == shellhWnd)
-                    return true;
-                if (!IsWindowVisible(hWnd))
-                    return true;
+                if (hWnd != shellhWnd &&
+                    IsWindowVisible(hWnd) &&
+                    GetWindowTextLength(hWnd) != 0)
+                {
+                    handles.Add(hWnd);
+                }
 
-                int length = GetWindowTextLength(hWnd);
-                if (length == 0)
-                    return true;
-
-                handles.Add(hWnd);
                 return true;
-            }, 0);
+            },
+            0);
 
             return handles;
         }

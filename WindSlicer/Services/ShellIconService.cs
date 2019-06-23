@@ -10,57 +10,75 @@ using System.Threading.Tasks;
 using WindSlicer.Commands;
 using WindSlicer.Commands.General;
 
-namespace WindSlicer.Utilities
+namespace WindSlicer.Services
 {
-    using PathIconMap = ConcurrentDictionary<string, Icon>;
+    //using PathIconMap = ConcurrentDictionary<string, Icon>;
 
-    public static class IconProvider
+    public class ShellIconService : IIconService
     {
-        private static readonly Lazy<Icon> _default = new Lazy<Icon>(() => SystemIcons.Application);
-        private static readonly Lazy<Icon> _error = new Lazy<Icon>(() => SystemIcons.Error);
-        private static readonly Lazy<Icon> _window = new Lazy<Icon>(() => SystemIcons.Application);
-        private static readonly Lazy<Icon> _folder = new Lazy<Icon>(DefaultIcons.FetchIcon, true);
+        private readonly Icon _folder = DefaultIcons.FetchIcon();
 
         /// <summary>
         /// Cache of application icons.
         /// </summary>
-        private static readonly PathIconMap _appIcons = new PathIconMap();
+        private readonly IDictionary<string, Icon> _appIcons;
 
-        public static Icon Default => _default.Value;
+        public Icon Default { get; } = SystemIcons.Application;
 
-        public static Icon GetIcon(BaseCommand command)
+        public ShellIconService()
+        {
+            _appIcons = new Dictionary<string, Icon>();
+        }
+
+        public Icon GetIcon(BaseCommand command)
         {
             switch (command)
             {
                 case WindowCommand _:
-                    return _window.Value;
+                    return SystemIcons.Application; // TODO: icon for snaps
                 case FolderCommand _:
-                    return _folder.Value;
+                    return _folder;
                 case ApplicationCommand cmd:
-                    return GetApplicationIcon(cmd);
+                    return this.GetApplicationIcon(cmd);
                 default:
-                    return _default.Value;
+                    return Default;
             }
         }
 
-        private static Icon GetApplicationIcon(ApplicationCommand cmd)
+        private Icon GetApplicationIcon(ApplicationCommand cmd)
         {
-            string path = cmd.FileLocation;
+            string path = cmd?.FileLocation ?? "";
 
             if (!File.Exists(path))
             {
-                return _error.Value;
+                return SystemIcons.Error;
             }
 
-            if (_appIcons.ContainsKey(path))
+            if (_appIcons.TryGetValue(path, out Icon existingIcon))
             {
-                return _appIcons.TryGetValue(path, out Icon icon) ? icon : Default;
+                return existingIcon;
             }
             else
             {
-                var icon = Icon.ExtractAssociatedIcon(path);
-                _appIcons.TryAdd(path, icon);
-                return icon;
+                if (Icon.ExtractAssociatedIcon(path) is Icon newIcon)
+                {
+                    _appIcons.Add(path, newIcon);
+                    return newIcon;
+                }
+                else
+                {
+                    return this.Default;
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            _folder.Dispose();
+
+            foreach (var icon in this._appIcons.Values)
+            {
+                icon?.Dispose();
             }
         }
 

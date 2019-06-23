@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using WindSlicer.Utilities;
+using WindSlicer.Win32.Handles;
 
 namespace WindSlicer.Win32.Hooks
 {
@@ -28,7 +29,7 @@ namespace WindSlicer.Win32.Hooks
         private bool keyState = false;
 
         private NativeMethods.HookProc HookProc { get; }
-        private IntPtr HHook { get; set; }
+        private SafeWindowsHookExHandle HookHandle { get; set; }
 
         public KeyboardHook(bool repeat)
         {
@@ -38,24 +39,48 @@ namespace WindSlicer.Win32.Hooks
 
         public void Subscribe(Keys key)
         {
-            if (key == Keys.None)
-                Error.InvalidOp($"Cannot hook key {key}");
+            if (this.HookHandle?.IsClosed == true)
+            {
+                Error.InvalidOp("Already closed");
+                return;
+            }
 
-            if (this.Key != Keys.None)
+            if (this.Key != default || this.HookHandle != null)
+            {
                 Error.InvalidOp($"Already hooked to {this.Key}");
+                return;
+            }
 
-            this.HHook = NativeMethods.SetWindowsHookEx(
+            if (key == Keys.None)
+            {
+                Error.InvalidOp($"Cannot hook key {key}");
+                return;
+            }
+
+            IntPtr handle = NativeMethods.SetWindowsHookEx(
                 HookType.WH_KEYBOARD_LL,
                 this.HookProc,
                 IntPtr.Zero,
                 0);
 
-            if (this.HHook == IntPtr.Zero)
+            this.HookHandle = new SafeWindowsHookExHandle(handle);
+
+            if (this.HookHandle.IsInvalid)
+            {
                 Error.Win32("SetWindowsHookEx failed");
+                return;
+            }
 
             this.Key = key;
         }
 
+        /// <summary>
+        /// Handle key presses. First read
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="wParam">Contains the key event</param>
+        /// <param name="lParam">Contains the key pressed</param>
+        /// <returns></returns>
         private IntPtr KeyboardHookProc(int code, IntPtr wParam, IntPtr lParam)
         {
             if (code >= 0 && (Keys)Marshal.ReadInt32(lParam) == this.Key)
@@ -64,7 +89,7 @@ namespace WindSlicer.Win32.Hooks
 
                 if (keyEvent == KeyEvents.KeyDown || keyEvent == KeyEvents.SKeyDown)
                 {
-                    if (this.Repeat || this.keyState == false)
+                    if (this.keyState == false || this.Repeat)
                     {
                         this.keyState = true;
                         KeyChanged?.Invoke(null, new KeyChangedEventArgs(this.Key, true));
@@ -82,10 +107,7 @@ namespace WindSlicer.Win32.Hooks
 
         public void Dispose()
         {
-            if (this.HHook != IntPtr.Zero)
-            {
-                NativeMethods.UnhookWindowsHookEx(this.HHook);
-            }
+            this.HookHandle?.Dispose();
         }
     }
 
