@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WindSlicer.Win32
+namespace WindSlicer.Win32.Handles
 {
     /// <summary>
     /// Use to get IntPtr from a managed object.
@@ -15,14 +15,14 @@ namespace WindSlicer.Win32
     /// </remarks>
     public class GCHandleProvider : IDisposable
     {
+        public IntPtr Pointer { get; }
+        public GCHandle Handle { get; }
+
         public GCHandleProvider(object target)
         {
             this.Handle = GCHandle.Alloc(target);
             this.Pointer = GCHandle.ToIntPtr(this.Handle);
         }
-
-        public IntPtr Pointer { get; }
-        public GCHandle Handle { get; }
 
         private void ReleaseUnmanagedResources()
         {

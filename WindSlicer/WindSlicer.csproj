@@ -40,6 +40,10 @@
       <HintPath>..\packages\ParallelExtensionsExtras.1.2.0.0\lib\net40\ParallelExtensionsExtras.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Annotations, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ComponentModel.Annotations.4.5.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -67,7 +71,22 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\LayoutPreview.xaml.cs">
+      <DependentUpon>LayoutPreview.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Services\ScreenManager.cs" />
+    <Compile Include="Utilities\Converters\PercentageConverter.cs" />
+    <Compile Include="Utilities\Extensions\GeneralExtensions.cs" />
+    <Compile Include="Models\LayoutModel.cs" />
+    <Compile Include="Models\SnapAreaModel.cs" />
+    <Compile Include="Windows\LayoutConfigurationWindow.xaml.cs">
+      <DependentUpon>LayoutConfigurationWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="CommandWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\LayoutPreview.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -97,18 +116,28 @@
     <Compile Include="CommandWindow.xaml.cs">
       <DependentUpon>CommandWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LayoutForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LayoutForm.Designer.cs">
+      <DependentUpon>LayoutForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Utilities\Converters\CanExecuteToBooleanConverter.cs" />
     <Compile Include="Utilities\Converters\CommandToImageConverter.cs" />
     <Compile Include="Utilities\Error.cs" />
     <Compile Include="Utilities\LazyDictionary.cs" />
+    <Compile Include="Services\IIconService.cs" />
     <Compile Include="Utilities\Util.cs" />
     <Compile Include="Utilities\Extensions\CollectionExtensions.cs" />
-    <Compile Include="Utilities\IconProvider.cs" />
+    <Compile Include="Services\ShellIconService.cs" />
     <Compile Include="Utilities\InlineComparer.cs" />
-    <Compile Include="Win32\DeviceContext.cs" />
+    <Compile Include="Win32\Handles\DeviceContext.cs" />
     <Compile Include="Win32\Enums.cs" />
-    <Compile Include="Win32\GCHandleProvider.cs" />
+    <Compile Include="Win32\Handles\GCHandleProvider.cs" />
+    <Compile Include="Win32\Handles\SafeWinEventHookHandle.cs" />
+    <Compile Include="Win32\Handles\SafeWindowsHookExHandle.cs" />
     <Compile Include="Win32\Hooks\DragWindowHook.cs" />
+    <Compile Include="Win32\Hooks\HotkeyHook.cs" />
     <Compile Include="Win32\Hooks\KeyboardHook.cs" />
     <Compile Include="Win32\Hooks\WindowLocationHook.cs" />
     <Compile Include="Win32\Hooks\WindowsHook.cs" />
@@ -118,6 +147,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Windows\LayoutConfigurationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

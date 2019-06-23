@@ -17,6 +17,7 @@ using WindSlicer.Commands;
 using WindSlicer.Commands.General;
 using WindSlicer.Commands.Keys;
 using WindSlicer.Commands.Window;
+using WindSlicer.Services;
 using WindSlicer.Win32;
 using WindSlicer.Win32.Hooks;
 
@@ -27,8 +28,9 @@ namespace WindSlicer
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly KeyboardHook kbHook;
+        private readonly HotkeyHook hkHook;
         private readonly DragWindowHook dragHook;
+        private readonly KeyboardHook kbHook;
 
         public bool Minimized => this.WindowState == WindowState.Minimized;
 
@@ -41,7 +43,7 @@ namespace WindSlicer
         {
             this.InitializeComponent();
 
-            this.kbHook = new KeyboardHook();
+            this.hkHook = new HotkeyHook();
             this.InitHotkeys();
 
             this.dragHook = new DragWindowHook();
@@ -50,35 +52,80 @@ namespace WindSlicer
             //InitTrayIcon();
             this.CmdWindow = new CommandWindow();
 
+
+            this.kbHook = new KeyboardHook(false);
+            kbHook.Subscribe(System.Windows.Forms.Keys.LMenu);
+            kbHook.KeyChanged += (_, args) =>
+            {
+                Console.WriteLine(args.Key + ", Pressed: " + args.KeyDown);
+            };
+
             this.Hide();
         }
 
         private void InitHotkeys()
         {
-            this.kbHook.RegisterHotKey(ModifierKeys.Control, System.Windows.Forms.Keys.OemBackslash);
-            this.kbHook.KeyPressed += (_, args) =>
+            this.hkHook.RegisterHotKey(ModifierKeys.Alt, System.Windows.Forms.Keys.OemBackslash);
+            this.hkHook.RegisterHotKey(ModifierKeys.Control, System.Windows.Forms.Keys.OemBackslash);
+            this.hkHook.KeyPressed += (_, args) =>
             {
                 if (args.Modifier == ModifierKeys.Control)
                 {
                     this.ShowSnapWindow();
+                }
+                else if (args.Modifier == ModifierKeys.Alt)
+                {
+                    Application.Current.Shutdown();
                 }
             };
         }
 
         private void InitDragHook()
         {
-            //this.dragHook.Subscribe();
-            //this.dragHook.WindowDragged += (_, args) =>
-            //{
-            //    if (!args.DragEnded)
-            //    {
-            //        System.Media.SystemSounds.Asterisk.Play();
-            //    }
-            //    else
-            //    {
-            //        System.Media.SystemSounds.Asterisk.Play();
-            //    }
-            //};
+            var mon = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
+
+            Rectangle transform(Rectangle rect)
+            {
+                return new Rectangle(
+                    (rect.X * mon.Width) / 8 + 16,
+                    (rect.Y * mon.Height) / 8 + 16,
+                    (rect.Width * mon.Width) / 8 - 32,
+                    (rect.Height * mon.Height) / 8 - 32);
+            }
+
+            var rekts = new Rectangle[]
+            {
+                new Rectangle(0, 0, 5, 8),
+                new Rectangle(5, 0, 3, 4),
+                new Rectangle(5, 4, 3, 4),
+            }
+            .Select(x => transform(x))
+            .ToArray();
+
+            var form = new LayoutForm();
+            form.SetLayout(rekts);
+
+            this.dragHook.Subscribe();
+            this.dragHook.WindowDragged += (_, args) =>
+            {
+                if (args.DragStarted)
+                {
+                    form.Show();
+
+                    NativeMethods.SetWindowPos(
+                        form.Handle, (int)SpecialWindowHandles.HWND_TOPMOST,
+                        0, 0, 0, 0,
+                        (int)(SetWindowPosFlags.SWP_NOMOVE |
+                        SetWindowPosFlags.SWP_NOSIZE | SetWindowPosFlags.SWP_NOACTIVATE));
+
+                    form.SetEnabled(true);
+                }
+                else
+                {
+                    form.SetEnabled(false);
+                    form.Hide();
+                }
+            };
         }
 
         private void InitTrayIcon()
@@ -169,8 +216,9 @@ namespace WindSlicer
         {
             if (!e.Cancel)
             {
-                this.kbHook.Dispose();
+                this.hkHook.Dispose();
                 this.dragHook.Dispose();
+                this.kbHook.Dispose();
             }
         }
     }

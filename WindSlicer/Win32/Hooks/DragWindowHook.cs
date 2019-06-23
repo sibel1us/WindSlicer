@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Win32.SafeHandles;
 using WindSlicer.Utilities;
+using WindSlicer.Win32.Handles;
 
 namespace WindSlicer.Win32.Hooks
 {
@@ -15,7 +17,7 @@ namespace WindSlicer.Win32.Hooks
         private const uint EVENT_SYSTEM_MOVESIZESTART = 0x000A;
         private const uint EVENT_SYSTEM_MOVESIZEEND = 0x000B;
 
-        protected override IntPtr HWinEventHook { get; set; }
+        protected override SafeWinEventHookHandle HookHandle { get; set; }
         protected override NativeMethods.WinEventDelegate EventDelegate { get; }
 
         public DragWindowHook()
@@ -25,10 +27,13 @@ namespace WindSlicer.Win32.Hooks
 
         public override void Subscribe()
         {
-            if (this.HWinEventHook != IntPtr.Zero)
+            if (this.HookHandle != null)
+            {
                 Error.InvalidOp("Already subscribed.");
+                return;
+            }
 
-            this.HWinEventHook = NativeMethods.SetWinEventHook(
+            IntPtr handle = NativeMethods.SetWinEventHook(
                 EVENT_SYSTEM_MOVESIZESTART,
                 EVENT_SYSTEM_MOVESIZEEND,
                 IntPtr.Zero,
@@ -37,8 +42,12 @@ namespace WindSlicer.Win32.Hooks
                 0,
                 WINEVENT_OUTOFCONTEXT);
 
-            if (this.HWinEventHook == IntPtr.Zero)
+            this.HookHandle = new SafeWinEventHookHandle(handle);
+
+            if (this.HookHandle.IsInvalid)
+            {
                 Error.Win32("SetWinEventHook failed");
+            }
         }
 
         protected override void WinEventProc(
@@ -53,21 +62,16 @@ namespace WindSlicer.Win32.Hooks
             if (hwnd == IntPtr.Zero)
                 return;
 
-            if (eventType == EVENT_SYSTEM_MOVESIZESTART)
+            switch (eventType)
             {
-                WindowDragged?.Invoke(null, new WindowDraggedEventArgs(hwnd, true));
-            }
-            else if (eventType == EVENT_SYSTEM_MOVESIZEEND)
-            {
-                WindowDragged?.Invoke(null, new WindowDraggedEventArgs(hwnd, false));
-            }
-        }
-
-        public override void Dispose()
-        {
-            if (this.HWinEventHook != IntPtr.Zero)
-            {
-                NativeMethods.UnhookWinEvent(this.HWinEventHook);
+                case EVENT_SYSTEM_MOVESIZESTART:
+                    WindowDragged?.Invoke(null, new WindowDraggedEventArgs(hwnd, true));
+                    break;
+                case EVENT_SYSTEM_MOVESIZEEND:
+                    WindowDragged?.Invoke(null, new WindowDraggedEventArgs(hwnd, false));
+                    break;
+                default:
+                    break;
             }
         }
     }

@@ -12,7 +12,8 @@ namespace WindSlicer.Commands.General
     /// Sends a click event to the calendar to show it. Does not work on Windows 10.
     /// </summary>
     /// <remarks>
-    /// Windows 10 limits messages sent to system processes, so this command does not work.
+    /// Windows 10 limits messages sent to system processes, so this command does not work without
+    /// admin privileges.
     /// </remarks>
     [Obsolete("Does not work on Windows 10.", error: false)]
     public class CalendarCommand : BaseCommand
@@ -21,6 +22,10 @@ namespace WindSlicer.Commands.General
         private const uint WM_NCLBUTTONUP = 0x00A2;
         private const uint HTCAPTION = 2;
 
+        private const string TRAY_SHELL = "Shell_TrayWnd";
+        private const string TRAY_NOTIFYWND = "TrayNotifyWnd";
+        private const string TRAY_CLOCK = "TrayClockWClass";
+
         public override bool CanExecute(object parameter)
         {
             return true;
@@ -28,12 +33,12 @@ namespace WindSlicer.Commands.General
 
         public override void Execute(object parameter)
         {
-            IntPtr trayhwnd = NativeMethods.FindWindow("Shell_TrayWnd", "");
-            IntPtr trayNotify = NativeMethods.FindWindowEx(trayhwnd, IntPtr.Zero, "TrayNotifyWnd", "");
+            IntPtr trayhwnd = NativeMethods.FindWindow(TRAY_SHELL, "");
+            //IntPtr trayNotify = NativeMethods.FindWindowEx(trayhwnd, IntPtr.Zero, TRAY_NOTIFYWND, "");
             IntPtr clockHwnd = IntPtr.Zero;
             foreach (IntPtr childHwnd in NativeApi.GetChildWindows(trayhwnd))
             {
-                if (NativeApi.GetClassName(childHwnd) == "TrayClockWClass")
+                if (NativeApi.GetClassName(childHwnd) == TRAY_CLOCK)
                 {
                     clockHwnd = childHwnd;
                     break;

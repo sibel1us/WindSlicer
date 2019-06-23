@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WindSlicer.Utilities;
+using WindSlicer.Win32.Handles;
 
 namespace WindSlicer.Win32.Hooks
 {
@@ -14,8 +15,8 @@ namespace WindSlicer.Win32.Hooks
         private const uint WINEVENT_OUTOFCONTEXT = 0;
         private const uint EVENT_OBJECT_LOCATIONCHANGE = 0x800B;
 
-        public IntPtr HWnd { get; set; }
-        protected override IntPtr HWinEventHook { get; set; }
+        public IntPtr HWnd { get; private set; }
+        protected override SafeWinEventHookHandle HookHandle { get; set; }
         protected override NativeMethods.WinEventDelegate EventDelegate { get; }
 
         public WindowLocationHook(IntPtr hwnd)
@@ -27,20 +28,38 @@ namespace WindSlicer.Win32.Hooks
         public override void Subscribe()
         {
             if (this.HWnd == IntPtr.Zero)
+            {
                 Error.InvalidOp("Target window handle not set.");
+                return;
+            }
 
-            if (this.HWinEventHook != IntPtr.Zero)
+            if (this.HookHandle != null)
+            {
                 Error.InvalidOp("Already subscribed.");
+                return;
+            }
+
+            if (this.HookHandle?.IsClosed == true)
+            {
+                Error.InvalidOp("Already closed.");
+                return;
+            }
 
             int threadId = NativeMethods.GetWindowThreadProcessId(this.HWnd, out int processId);
 
             if (processId == default)
+            {
                 Error.Win32("Could not retrieve process Id");
+                return;
+            }
 
             if (threadId == default)
+            {
                 Error.Win32("Could not retrieve thread Id");
+                return;
+            }
 
-            this.HWinEventHook = NativeMethods.SetWinEventHook(
+            IntPtr handle = NativeMethods.SetWinEventHook(
                 EVENT_OBJECT_LOCATIONCHANGE,
                 EVENT_OBJECT_LOCATIONCHANGE,
                 IntPtr.Zero,
@@ -49,8 +68,12 @@ namespace WindSlicer.Win32.Hooks
                 (uint)threadId,
                 WINEVENT_OUTOFCONTEXT);
 
-            if (IntPtr.Zero == this.HWinEventHook)
+            this.HookHandle = new SafeWinEventHookHandle(handle);
+
+            if (this.HookHandle.IsInvalid)
+            {
                 Error.Win32($"SetWinEventHook failed");
+            }
         }
 
         protected override void WinEventProc(
@@ -67,15 +90,8 @@ namespace WindSlicer.Win32.Hooks
 
             WindowLocationChanged?.Invoke(null, new WindowLocationChangedEventArgs(hwnd));
         }
-
-        public override void Dispose()
-        {
-            if (this.HWinEventHook != IntPtr.Zero)
-            {
-                NativeMethods.UnhookWinEvent(this.HWinEventHook);
-            }
-        }
     }
+
 
     public class WindowLocationChangedEventArgs
     {

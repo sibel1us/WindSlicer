@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Win32.SafeHandles;
+using WindSlicer.Win32.Handles;
 
 namespace WindSlicer.Win32.Hooks
 {
-    // TODO: check if IGCHandle needed
     public abstract class WindowsHook : IDisposable
     {
-        protected abstract IntPtr HWinEventHook { get; set; }
-
+        protected abstract SafeWinEventHookHandle HookHandle { get; set; }
         protected abstract NativeMethods.WinEventDelegate EventDelegate { get; }
 
         public abstract void Subscribe();
@@ -24,6 +25,9 @@ namespace WindSlicer.Win32.Hooks
             uint dwEventThread,
             uint dwmsEventTime);
 
-        public abstract void Dispose();
+        public void Dispose()
+        {
+            this.HookHandle?.Dispose();
+        }
     }
 }

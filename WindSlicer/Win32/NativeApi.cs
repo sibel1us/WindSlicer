@@ -44,7 +44,7 @@ namespace WindSlicer.Win32
         /// <param name="hWnd"></param>
         /// <param name="newWidth"></param>
         /// <param name="newHeight"></param>
-        /// <param name="_">Anchor point of the window when resizing.</param>
+        /// <param name="alignment">Anchor point of the window when resizing.</param>
         /// <returns></returns>
         public static bool ClientResize(
             IntPtr hWnd,
@@ -52,10 +52,10 @@ namespace WindSlicer.Win32
             int newHeight,
             ContentAlignment _ = ContentAlignment.TopLeft)
         {
-            bool gotClientRect = GetClientRect(hWnd, out RECT clientRect);
-            bool gotWindowRect = GetWindowRect(hWnd, out RECT windowRect);
+            if (!GetClientRect(hWnd, out RECT clientRect))
+                return false;
 
-            if (!gotClientRect || !gotWindowRect)
+            if (!GetWindowRect(hWnd, out RECT windowRect))
                 return false;
 
             var diff = new Point(
@@ -118,17 +118,14 @@ namespace WindSlicer.Win32
 
         public static RECT? GetWin10Bounds(IntPtr hWnd)
         {
-            // TODO: check error code
-            DwmGetWindowAttribute(
+            int retVal = DwmGetWindowAttribute(
                 hWnd,
                 DwmWindowAttribute.DWMWA_EXTENDED_FRAME_BOUNDS,
-                out RECT outVal,
-                Marshal.SizeOf(typeof(RECT)));
+                out RECT outRect,
+                Marshal.SizeOf<RECT>());
 
-            if (outVal is RECT rect)
-            {
-                return rect;
-            }
+            if (retVal == 0)
+                return outRect;
 
             return null;
         }
@@ -142,26 +139,12 @@ namespace WindSlicer.Win32
         {
             var result = new List<IntPtr>();
 
-            using (var gchProvider = new GCHandleProvider(result))
+            EnumChildWindows(parentHwnd, delegate (IntPtr childHwnd, int _)
             {
-                EnumChildWindows(parentHwnd, delegate (IntPtr childHwnd, int pointer)
-                {
-                    var gcHandle = GCHandle.FromIntPtr(new IntPtr(pointer));
-
-                    if (gcHandle.Target is List<IntPtr> list)
-                    {
-                        list.Add(childHwnd);
-                        return true;
-                    }
-                    else
-                    {
-                        throw new InvalidCastException(
-                            $"Cannot cast the handle as {nameof(List<IntPtr>)}");
-                    }
-
-                },
-                gchProvider.Pointer);
-            }
+                result.Add(childHwnd);
+                return true;
+            },
+            IntPtr.Zero);
 
             return result;
         }
@@ -177,21 +160,21 @@ namespace WindSlicer.Win32
 
             EnumWindows(delegate (IntPtr hWnd, int lParam)
             {
-                if (hWnd == shellhWnd)
-                    return true;
-                if (!IsWindowVisible(hWnd))
+                if (hWnd == shellhWnd || !IsWindowVisible(hWnd))
                     return true;
 
                 int length = GetWindowTextLength(hWnd);
+
                 if (length == 0)
                     return true;
 
-                StringBuilder builder = new StringBuilder(length);
+                var builder = new StringBuilder(length);
                 GetWindowText(hWnd, builder, length + 1);
 
                 windows[hWnd] = builder.ToString();
                 return true;
-            }, 0);
+            },
+            0);
 
             return windows;
         }
@@ -203,18 +186,16 @@ namespace WindSlicer.Win32
 
             EnumWindows(delegate (IntPtr hWnd, int lParam)
             {
-                if (hWnd == shellhWnd)
-                    return true;
-                if (!IsWindowVisible(hWnd))
-                    return true;
+                if (hWnd != shellhWnd &&
+                    IsWindowVisible(hWnd) &&
+                    GetWindowTextLength(hWnd) != 0)
+                {
+                    handles.Add(hWnd);
+                }
 
-                int length = GetWindowTextLength(hWnd);
-                if (length == 0)
-                    return true;
-
-                handles.Add(hWnd);
                 return true;
-            }, 0);
+            },
+            0);
 
             return handles;
         }

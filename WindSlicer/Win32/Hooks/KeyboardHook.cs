@@ -7,111 +7,119 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using WindSlicer.Utilities;
+using WindSlicer.Win32.Handles;
 
 namespace WindSlicer.Win32.Hooks
 {
     public sealed class KeyboardHook : IDisposable
     {
-        /// <remarks>
-        /// This is here instead of NativeMethods because it shouldn't be called anywhere else.
-        /// </remarks>
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
-
-        /// <remarks>
-        /// This is here instead of NativeMethods because it shouldn't be called anywhere else.
-        /// </remarks>
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-
-        /// <summary>
-        /// Represents the window that is used internally to get the messages.
-        /// </summary>
-        private class HookedWindow : NativeWindow, IDisposable
+        private enum KeyEvents
         {
-            private static readonly int WM_HOTKEY = (int)WM.HOTKEY;
+            KeyDown = 0x0100,
+            KeyUp = 0x0101,
+            SKeyDown = 0x0104,
+            SKeyUp = 0x0105
+        }
 
-            public HookedWindow()
+        public event EventHandler<KeyChangedEventArgs> KeyChanged;
+
+        public Keys Key { get; private set; }
+        public bool Repeat { get; }
+
+        private bool keyState = false;
+
+        private NativeMethods.HookProc HookProc { get; }
+        private SafeWindowsHookExHandle HookHandle { get; set; }
+
+        public KeyboardHook(bool repeat)
+        {
+            this.Repeat = repeat;
+            this.HookProc = new NativeMethods.HookProc(this.KeyboardHookProc);
+        }
+
+        public void Subscribe(Keys key)
+        {
+            if (this.HookHandle?.IsClosed == true)
             {
-                this.CreateHandle(new CreateParams());
+                Error.InvalidOp("Already closed");
+                return;
             }
 
-            /// <summary>
-            /// Overridden to get the notifications.
-            /// </summary>
-            /// <param name="m"></param>
-            protected override void WndProc(ref Message m)
+            if (this.Key != default || this.HookHandle != null)
             {
-                base.WndProc(ref m);
+                Error.InvalidOp($"Already hooked to {this.Key}");
+                return;
+            }
 
-                if (m.Msg == WM_HOTKEY)
+            if (key == Keys.None)
+            {
+                Error.InvalidOp($"Cannot hook key {key}");
+                return;
+            }
+
+            IntPtr handle = NativeMethods.SetWindowsHookEx(
+                HookType.WH_KEYBOARD_LL,
+                this.HookProc,
+                IntPtr.Zero,
+                0);
+
+            this.HookHandle = new SafeWindowsHookExHandle(handle);
+
+            if (this.HookHandle.IsInvalid)
+            {
+                Error.Win32("SetWindowsHookEx failed");
+                return;
+            }
+
+            this.Key = key;
+        }
+
+        /// <summary>
+        /// Handle key presses. First read
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="wParam">Contains the key event</param>
+        /// <param name="lParam">Contains the key pressed</param>
+        /// <returns></returns>
+        private IntPtr KeyboardHookProc(int code, IntPtr wParam, IntPtr lParam)
+        {
+            if (code >= 0 && (Keys)Marshal.ReadInt32(lParam) == this.Key)
+            {
+                var keyEvent = (KeyEvents)wParam.ToInt32();
+
+                if (keyEvent == KeyEvents.KeyDown || keyEvent == KeyEvents.SKeyDown)
                 {
-                    Keys key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);
-                    ModifierKeys modifier = (ModifierKeys)((int)m.LParam & 0xFFFF);
-
-                    KeyPressed?.Invoke(this, new KeyPressedEventArgs(modifier, key));
+                    if (this.keyState == false || this.Repeat)
+                    {
+                        this.keyState = true;
+                        KeyChanged?.Invoke(null, new KeyChangedEventArgs(this.Key, true));
+                    }
+                }
+                else if (keyEvent == KeyEvents.KeyUp || keyEvent == KeyEvents.SKeyUp)
+                {
+                    this.keyState = false;
+                    KeyChanged?.Invoke(null, new KeyChangedEventArgs(this.Key, false));
                 }
             }
 
-            public event EventHandler<KeyPressedEventArgs> KeyPressed;
-
-            public void Dispose()
-            {
-                this.DestroyHandle();
-            }
+            return NativeMethods.CallNextHookEx(IntPtr.Zero, code, wParam, lParam);
         }
-
-        private readonly HookedWindow hookedWindow;
-        private int currentId;
-
-        public KeyboardHook()
-        {
-            this.hookedWindow = new HookedWindow();
-
-            this.hookedWindow.KeyPressed += delegate (object _, KeyPressedEventArgs args)
-            {
-                KeyPressed?.Invoke(this, args);
-            };
-        }
-
-        /// <summary>
-        /// Registers a hotkey in the system.
-        /// </summary>
-        /// <param name="modifier">The modifiers that are associated with the hot key.</param>
-        /// <param name="key">The key itself that is associated with the hot key.</param>
-        public void RegisterHotKey(ModifierKeys modifier, Keys key)
-        {
-            this.currentId += 1;
-
-            if (!RegisterHotKey(this.hookedWindow.Handle, this.currentId, (uint)modifier, (uint)key))
-                Error.Win32("RegisterHotKey failed");
-        }
-
-        public event EventHandler<KeyPressedEventArgs> KeyPressed;
 
         public void Dispose()
         {
-            for (int i = this.currentId; i > 0; i--)
-            {
-                UnregisterHotKey(this.hookedWindow.Handle, i);
-            }
-
-            this.hookedWindow.Dispose();
+            this.HookHandle?.Dispose();
         }
     }
 
-    /// <summary>
-    /// Event Args for the event that is fired after the hot key has been pressed.
-    /// </summary>
-    public class KeyPressedEventArgs : EventArgs
+    public sealed class KeyChangedEventArgs : EventArgs
     {
-        public ModifierKeys Modifier { get; }
         public Keys Key { get; }
+        public bool KeyDown { get; }
 
-        internal KeyPressedEventArgs(ModifierKeys modifier, Keys key)
+        public KeyChangedEventArgs(Keys key, bool keyDown)
         {
-            this.Modifier = modifier;
             this.Key = key;
+            this.KeyDown = keyDown;
         }
     }
 }
