@@ -11,10 +11,15 @@ using System.Windows.Markup;
 
 namespace WindSlicer.Utilities.Extensions
 {
+    /// <summary>
+    /// </summary>
+    /// <remarks>
+    /// Source: social.msdn.microsoft.com/Forums/en-US/88ede912-3f58-4b41-90be-8439c65f12b4/
+    /// </remarks>
     public class DisplayExtension : MarkupExtension
     {
-        private string propertyName;
-        private Type type;
+        private readonly string propertyName;
+        private readonly Type type;
 
         public DisplayExtension(string propertyName, Type type)
         {
@@ -24,10 +29,9 @@ namespace WindSlicer.Utilities.Extensions
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            if (serviceProvider.GetService(typeof(IProvideValueTarget)) is IProvideValueTarget pvt)
+            if (serviceProvider.GetService(typeof(IProvideValueTarget)) is IProvideValueTarget)
             {
-                PropertyInfo propertyInfo = type.GetProperty(propertyName);
-                if (propertyInfo != null)
+                if (type.GetProperty(propertyName) is PropertyInfo propertyInfo)
                 {
                     if (propertyInfo.GetCustomAttributes(typeof(DisplayAttribute), true)
                         .FirstOrDefault() is DisplayAttribute att)
