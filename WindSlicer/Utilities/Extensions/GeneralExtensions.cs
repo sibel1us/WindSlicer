@@ -17,6 +17,7 @@ namespace WindSlicer.Utilities.Extensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Round(this double @this)
         {
+            // TODO
             return (int)Math.Floor(@this + 0.5);
         }
 

@@ -31,7 +31,7 @@ namespace WindSlicer.Models
             }
         }
 
-        public ObservableCollection<SnapAreaModel> Areas { get; }
+        public ObservableCollection<SnapAreaModel> Areas { get; set; }
 
         public LayoutModel()
         {

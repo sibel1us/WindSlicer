@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="WindSlicer.Controls.SnapAreaPreview"
+             x:Name="SnapAreaControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WindSlicer.Controls"
+             xmlns:models="clr-namespace:WindSlicer.Models"
+             xmlns:debug="clr-namespace:System.Diagnostics;assembly=System"
+             xmlns:converters="clr-namespace:WindSlicer.Utilities.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="128" d:DesignWidth="128"
+             MouseDown="Control_MouseDown"
+             IsHitTestVisible="True"
+             DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <UserControl.Resources>
+        <converters:RelativeSizeConverter x:Key="SizeConverter"/>
+        <converters:IsSelectedConverter x:Key="SelectedConverter"/>
+        <converters:BooleanToDoubleConverter x:Key="BoolDoubleConverter"/>
+    </UserControl.Resources>
+    <UserControl.Style>
+        <Style TargetType="{x:Type UserControl}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=RootRectangle}" Value="True">
+                    <Setter Property="Panel.ZIndex" Value="9999"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Style>
+    <Canvas.Left>
+        <MultiBinding Converter="{StaticResource SizeConverter}">
+            <Binding Path="Model.X"/>
+            <Binding Path="Layout.AreaContainer.Width"/>
+        </MultiBinding>
+    </Canvas.Left>
+    <Canvas.Top>
+        <MultiBinding Converter="{StaticResource SizeConverter}">
+            <Binding Path="Model.Y"/>
+            <Binding Path="Layout.AreaContainer.Height"/>
+        </MultiBinding>
+    </Canvas.Top>
+    <Rectangle x:Name="Root"
+               Fill="Blue"
+               Stroke="Black">
+        <Rectangle.Resources>
+            <system:Double x:Key="NormalOpacity">0.5</system:Double>
+            <system:Double x:Key="SelectedOpacity">1.0</system:Double>
+        </Rectangle.Resources>
+        <Rectangle.Opacity>
+            <MultiBinding Converter="{StaticResource BoolDoubleConverter}">
+                <Binding Path="IsEnabled" ElementName="Root"/>
+                <Binding Source="{StaticResource SelectedOpacity}"/>
+                <Binding Source="{StaticResource NormalOpacity}"/>
+            </MultiBinding>
+        </Rectangle.Opacity>
+        <Rectangle.IsEnabled>
+            <MultiBinding Converter="{StaticResource SelectedConverter}">
+                <Binding Path="Model"/>
+                <Binding Path="Layout.AreaListBox.SelectedItem"/>
+            </MultiBinding>
+        </Rectangle.IsEnabled>
+        <Rectangle.Width>
+            <MultiBinding Converter="{StaticResource SizeConverter}">
+                <Binding Path="Model.Width"/>
+                <Binding Path="Layout.AreaContainer.Width"/>
+            </MultiBinding>
+        </Rectangle.Width>
+        <Rectangle.Height>
+            <MultiBinding Converter="{StaticResource SizeConverter}">
+                <Binding Path="Model.Height"/>
+                <Binding Path="Layout.AreaContainer.Height"/>
+            </MultiBinding>
+        </Rectangle.Height>
+    </Rectangle>
+</UserControl>

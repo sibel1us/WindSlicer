@@ -74,11 +74,19 @@
     <Compile Include="Controls\LayoutPreview.xaml.cs">
       <DependentUpon>LayoutPreview.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\SnapAreaPreview.xaml.cs">
+      <DependentUpon>SnapAreaPreview.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Services\ScreenManager.cs" />
+    <Compile Include="Utilities\Converters\BooleanToDoubleConverter.cs" />
+    <Compile Include="Utilities\Converters\IsSelectedConverter.cs" />
     <Compile Include="Utilities\Converters\PercentageConverter.cs" />
+    <Compile Include="Utilities\Converters\RelativeSizeConverter.cs" />
+    <Compile Include="Utilities\Extensions\DisplayExtension.cs" />
     <Compile Include="Utilities\Extensions\GeneralExtensions.cs" />
     <Compile Include="Models\LayoutModel.cs" />
     <Compile Include="Models\SnapAreaModel.cs" />
+    <Compile Include="Utilities\Extensions\WPFExtensions.cs" />
     <Compile Include="Windows\LayoutConfigurationWindow.xaml.cs">
       <DependentUpon>LayoutConfigurationWindow.xaml</DependentUpon>
     </Compile>
@@ -87,6 +95,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\LayoutPreview.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SnapAreaPreview.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

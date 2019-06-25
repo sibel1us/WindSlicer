@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WindSlicer.Windows"
+        xmlns:controls="clr-namespace:WindSlicer.Controls"
         mc:Ignorable="d"
         Title="LayoutConfigurationWindow" Height="480" Width="640"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
@@ -12,17 +13,6 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <Border>
-                <Canvas Background="DarkBlue" Width="640" Height="360">
-                <Rectangle Fill="Red"
-                           Stroke="White"
-                           Width="100"
-                           Height="100"
-                           Canvas.Bottom="0.5"
-                           Canvas.Top="0.1"
-                           Canvas.Right="0.2"
-                           Canvas.Left="0.5"/>
-            </Canvas>
-        </Border>
+        <controls:LayoutPreview/>
     </Grid>
 </Window>

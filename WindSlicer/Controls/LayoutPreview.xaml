@@ -1,13 +1,133 @@
-﻿<UserControl x:Class="WindSlicer.Controls.LayoutPreview"
+﻿<UserControl x:Name="LayoutPreviewControl"
+             x:Class="WindSlicer.Controls.LayoutPreview"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WindSlicer.Controls"
+             xmlns:models="clr-namespace:WindSlicer.Models"
+             xmlns:controls="clr-namespace:WindSlicer.Controls"
+             xmlns:ext="clr-namespace:WindSlicer.Utilities.Extensions"
+             xmlns:converters="clr-namespace:WindSlicer.Utilities.Converters"
+             xmlns:services="clr-namespace:WindSlicer.Services"
+             xmlns:debug="clr-namespace:System.Diagnostics;assembly=System"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              DataContext="{Binding RelativeSource={RelativeSource Self}}">
-    <Canvas Background="BlanchedAlmond">
-        
-    </Canvas>
+    <UserControl.Resources>
+        <converters:RelativeSizeConverter x:Key="SizeConverter"/>
+        <Style TargetType="{x:Type FrameworkElement}" x:Key="ValidatingControl">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip" Value="{Binding 
+                        Path=(Validation.Errors)[0].ErrorContent, 
+                        RelativeSource={x:Static RelativeSource.Self}}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="InputField"
+               BasedOn="{StaticResource ValidatingControl}"
+               TargetType="{x:Type TextBox}">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="InputLabel"
+               TargetType="{x:Type Label}">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Border Grid.Column="0"
+                Grid.RowSpan="2"
+                Margin="8,8,0,8"
+                BorderThickness="1"
+                Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}">
+            <Viewbox Stretch="Uniform"
+                     HorizontalAlignment="Left">
+                <Canvas x:Name="Container"
+                    Background="BlanchedAlmond"
+                    SnapsToDevicePixels="True"
+                    Width="640"
+                    Height="360"/>
+            </Viewbox>
+        </Border>
+        <Border x:Name="FormContainer"
+                Grid.Column="1"
+                Grid.Row="0"
+                Margin="8">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Row="0"
+                       Grid.Column="0"
+                       Style="{StaticResource InputLabel}"
+                       Content="{ext:Display X, {x:Type models:SnapAreaModel}}"/>
+                <TextBox x:Name="InputX"
+                         Grid.Row="0"
+                         Grid.Column="1"
+                         Style="{StaticResource InputField}"
+                         Text="{Binding SelectedArea.X, Mode=TwoWay, ValidatesOnDataErrors=True}"/>
+                <Label Grid.Row="1"
+                       Grid.Column="0"
+                       Style="{StaticResource InputLabel}"
+                       Content="{ext:Display Y, {x:Type models:SnapAreaModel}}"/>
+                <TextBox x:Name="InputY"
+                         Grid.Row="1"
+                         Grid.Column="1"
+                         Style="{StaticResource InputField}"
+                         Text="{Binding SelectedArea.Y, Mode=TwoWay, ValidatesOnDataErrors=True}"/>
+                <Label Grid.Row="2"
+                       Grid.Column="0"
+                       Content="{ext:Display Width, {x:Type models:SnapAreaModel}}"/>
+                <TextBox x:Name="InputWidth"
+                         Grid.Row="2"
+                         Grid.Column="1"
+                         Style="{StaticResource InputField}"
+                         Text="{Binding SelectedArea.Width, Mode=TwoWay, ValidatesOnDataErrors=True}"/>
+                <Label Grid.Row="3"
+                       Grid.Column="0"
+                       Content="{ext:Display Height, {x:Type models:SnapAreaModel}}"/>
+                <TextBox x:Name="InputHeight"
+                         Grid.Row="3"
+                         Grid.Column="1"
+                         Style="{StaticResource InputField}"
+                         Text="{Binding SelectedArea.Height, Mode=TwoWay, ValidatesOnDataErrors=True}"/>
+                 <Button x:Name="UpdateButton"
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Click="UpdateButton_Click">
+                    Update
+                </Button>
+            </Grid>
+        </Border>
+        <ListBox x:Name="ItemListBox"
+                 Grid.Column="1"
+                 Grid.Row="1"
+                 ItemsSource="{Binding Model.Areas}"
+                 SelectedItem="{Binding Path=SelectedArea, Mode=TwoWay}"
+                 DisplayMemberPath="DisplayString"
+                 Margin="8"
+                 MinWidth="160">
+        </ListBox>
+    </Grid>
 </UserControl>
