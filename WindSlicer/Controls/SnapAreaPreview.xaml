@@ -15,9 +15,9 @@
              IsHitTestVisible="True"
              DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <UserControl.Resources>
-        <converters:RelativeSizeConverter x:Key="SizeConverter"/>
-        <converters:IsSelectedConverter x:Key="SelectedConverter"/>
-        <converters:BooleanToDoubleConverter x:Key="BoolDoubleConverter"/>
+        <converters:RelativeSizeConverter x:Key="RelativeSizeConverter"/>
+        <converters:AllValuesEqualConverter x:Key="SelectedConverter"/>
+        <converters:ConditionalValueConverter x:Key="ConditionalValueConverter"/>
     </UserControl.Resources>
     <UserControl.Style>
         <Style TargetType="{x:Type UserControl}">
@@ -29,13 +29,13 @@
         </Style>
     </UserControl.Style>
     <Canvas.Left>
-        <MultiBinding Converter="{StaticResource SizeConverter}">
+        <MultiBinding Converter="{StaticResource RelativeSizeConverter}">
             <Binding Path="Model.X"/>
             <Binding Path="Layout.AreaContainer.Width"/>
         </MultiBinding>
     </Canvas.Left>
     <Canvas.Top>
-        <MultiBinding Converter="{StaticResource SizeConverter}">
+        <MultiBinding Converter="{StaticResource RelativeSizeConverter}">
             <Binding Path="Model.Y"/>
             <Binding Path="Layout.AreaContainer.Height"/>
         </MultiBinding>
@@ -48,7 +48,7 @@
             <system:Double x:Key="SelectedOpacity">1.0</system:Double>
         </Rectangle.Resources>
         <Rectangle.Opacity>
-            <MultiBinding Converter="{StaticResource BoolDoubleConverter}">
+            <MultiBinding Converter="{StaticResource ConditionalValueConverter}">
                 <Binding Path="IsEnabled" ElementName="Root"/>
                 <Binding Source="{StaticResource SelectedOpacity}"/>
                 <Binding Source="{StaticResource NormalOpacity}"/>
@@ -61,13 +61,13 @@
             </MultiBinding>
         </Rectangle.IsEnabled>
         <Rectangle.Width>
-            <MultiBinding Converter="{StaticResource SizeConverter}">
+            <MultiBinding Converter="{StaticResource RelativeSizeConverter}">
                 <Binding Path="Model.Width"/>
                 <Binding Path="Layout.AreaContainer.Width"/>
             </MultiBinding>
         </Rectangle.Width>
         <Rectangle.Height>
-            <MultiBinding Converter="{StaticResource SizeConverter}">
+            <MultiBinding Converter="{StaticResource RelativeSizeConverter}">
                 <Binding Path="Model.Height"/>
                 <Binding Path="Layout.AreaContainer.Height"/>
             </MultiBinding>

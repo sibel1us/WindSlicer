@@ -8,7 +8,7 @@ using System.Windows.Data;
 
 namespace WindSlicer.Utilities.Converters
 {
-    public class BooleanToDoubleConverter : IMultiValueConverter
+    public class AllValuesEqualConverter : IMultiValueConverter
     {
         public object Convert(
             object[] values,
@@ -16,15 +16,7 @@ namespace WindSlicer.Utilities.Converters
             object parameter,
             CultureInfo culture)
         {
-            if (values.Length == 3 &&
-                values[0] is bool b &&
-                values[1] is double trueValue &&
-                values[2] is double falseValue)
-            {
-                return b ? trueValue : falseValue;
-            }
-
-            return 0.0;
+            return values.Distinct().Count() == 1;
         }
 
         public object[] ConvertBack(

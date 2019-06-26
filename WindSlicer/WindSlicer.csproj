@@ -78,9 +78,13 @@
       <DependentUpon>SnapAreaPreview.xaml</DependentUpon>
     </Compile>
     <Compile Include="Services\ScreenManager.cs" />
-    <Compile Include="Utilities\Converters\BooleanToDoubleConverter.cs" />
-    <Compile Include="Utilities\Converters\IsSelectedConverter.cs" />
-    <Compile Include="Utilities\Converters\PercentageConverter.cs" />
+    <Compile Include="Utilities\Converters\BindingProxy.cs" />
+    <Compile Include="Utilities\Converters\ConditionalValueConverter.cs" />
+    <Compile Include="Utilities\Converters\RoutingConverter.cs" />
+    <Compile Include="Utilities\Converters\AllValuesEqualConverter.cs" />
+    <Compile Include="Utilities\Converters\NoConversionConverter.cs" />
+    <Compile Include="Utilities\Converters\PercentConverter.cs" />
+    <Compile Include="Utilities\Converters\PixelConverter.cs" />
     <Compile Include="Utilities\Converters\RelativeSizeConverter.cs" />
     <Compile Include="Utilities\Extensions\DisplayExtension.cs" />
     <Compile Include="Utilities\Extensions\GeneralExtensions.cs" />

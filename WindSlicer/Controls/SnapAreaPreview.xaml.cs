@@ -66,11 +66,8 @@ namespace WindSlicer.Controls
         {
             if (!e.Handled && this.Layout != null)
             {
-                if (this.Layout.SelectedArea != this.Model)
-                {
-                    this.Layout.SelectedArea = this.Model;
-                    e.Handled = true;
-                }
+                this.Layout.SelectedArea = this.Model;
+                e.Handled = true;
             }
         }
     }

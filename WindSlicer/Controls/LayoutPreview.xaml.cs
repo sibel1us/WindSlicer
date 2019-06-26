@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
@@ -19,6 +20,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WindSlicer.Models;
 using WindSlicer.Services;
+using WindSlicer.Utilities.Converters;
 using WindSlicer.Utilities.Extensions;
 
 namespace WindSlicer.Controls
@@ -30,11 +32,15 @@ namespace WindSlicer.Controls
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private double m_aspectRatio = 16d / 9d;
-        private LayoutModel m_model = new LayoutModel
-        {
-            Name = "Nibba"
-        };
+        private const double MAX_WIDTH = 1280.0;
+        private const double MAX_HEIGHT = 720.0;
+        private const double DEFAULT_ASPECT = MAX_WIDTH / MAX_HEIGHT;
+
+        private LayoutModel m_model = new LayoutModel { Name = "layout name" };
+        private SnapAreaModel m_selectedArea = null;
+        private bool m_usePixels = false;
+        private int m_resX = 0;
+        private int m_resY = 0;
 
         public LayoutModel Model
         {
@@ -49,8 +55,6 @@ namespace WindSlicer.Controls
             }
         }
 
-
-        private SnapAreaModel m_selectedArea = null;
         public SnapAreaModel SelectedArea
         {
             get => this.m_selectedArea;
@@ -67,25 +71,67 @@ namespace WindSlicer.Controls
         public Canvas AreaContainer => this.Container;
         public ListBox AreaListBox => this.ItemListBox;
 
-        public double AspectRatio
+        [Display(Name = "Use Pixels")]
+        public bool UsePixels
         {
-            get => this.m_aspectRatio;
-            private set
+            get => this.m_usePixels;
+            set
             {
-                if (value > 0.0 && !value.Equals5Digits(this.m_aspectRatio))
+                if (value != this.m_usePixels)
                 {
-                    this.m_aspectRatio = value;
+                    this.m_usePixels = value;
                     this.OnPropertyChanged();
+                    this.OnPropertyChanged("");
                 }
             }
         }
+
+        [Display(Name = "Resolution Width")]
+        public int ResolutionX
+        {
+            get => this.m_resX;
+            set
+            {
+                if (value > 0 && value != m_resX)
+                {
+                    this.m_resX = value;
+                    this.OnPropertyChanged();
+                    this.OnPropertyChanged(nameof(CanvasWidth));
+                    this.OnPropertyChanged(nameof(CanvasHeight));
+                }
+            }
+        }
+
+        [Display(Name = "Resolution Height")]
+        public int ResolutionY
+        {
+            get => this.m_resY;
+            set
+            {
+                if (value > 0 && value != m_resY)
+                {
+                    this.m_resY = value;
+                    this.OnPropertyChanged();
+                    this.OnPropertyChanged(nameof(CanvasWidth));
+                    this.OnPropertyChanged(nameof(CanvasHeight));
+                }
+            }
+        }
+
+        public double AspectRatio => this.ResolutionX / (double)this.ResolutionY;
 
         public double CanvasWidth
         {
             get
             {
-                var width = 640.0;
-                return width;
+                if (this.AspectRatio == double.NaN || this.AspectRatio > DEFAULT_ASPECT)
+                {
+                    return MAX_WIDTH;
+                }
+                else
+                {
+                    return MAX_WIDTH / this.AspectRatio;
+                }
             }
         }
 
@@ -93,8 +139,14 @@ namespace WindSlicer.Controls
         {
             get
             {
-                var height = 480.0;
-                return height;
+                if (this.AspectRatio == double.NaN || this.AspectRatio <= DEFAULT_ASPECT)
+                {
+                    return MAX_HEIGHT;
+                }
+                else
+                {
+                    return MAX_HEIGHT / this.AspectRatio;
+                }
             }
         }
 
@@ -102,8 +154,11 @@ namespace WindSlicer.Controls
         {
             this.InitializeComponent();
 
+            // TODO: taskbar location
+            this.ResolutionX = ScreenManager.PrimaryScreen.WorkingArea.Width;
+            this.ResolutionY = ScreenManager.PrimaryScreen.WorkingArea.Height;
+
             // Initialize event handlers
-            this.PropertyChanged += this.LayoutPreview_PropertyChanged;
             this.Model.Areas.CollectionChanged += this.Areas_CollectionChanged;
 
             this.Model.Areas.Add(new SnapAreaModel
@@ -125,14 +180,12 @@ namespace WindSlicer.Controls
 
         private void AddItems(IEnumerable<SnapAreaModel> items)
         {
-            SnapAreaPreview p = null;
             foreach (var item in items)
             {
-                p = new SnapAreaPreview
+                this.Container.Children.Add(new SnapAreaPreview
                 {
                     Model = item
-                };
-                this.Container.Children.Add(p);
+                });
             }
         }
 
@@ -143,7 +196,7 @@ namespace WindSlicer.Controls
             foreach (var item in this.Container.Children)
             {
                 if (item is SnapAreaPreview snapPreview &&
-                    items.Contains(snapPreview.Model))
+                    !items.Contains(snapPreview.Model))
                 {
                     controlsToRemove.Add(snapPreview);
                 }
@@ -186,22 +239,17 @@ namespace WindSlicer.Controls
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private void LayoutPreview_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(this.Model):
-                    break;
-                case nameof(this.AspectRatio):
-                    this.OnPropertyChanged(nameof(CanvasWidth));
-                    this.OnPropertyChanged(nameof(CanvasHeight));
-                    break;
-            }
-        }
-
         private void UpdateButton_Click(object sender, RoutedEventArgs e)
         {
+            var inputs = new Control[]
+            {
+                this.InputX, this.InputY, this.InputWidth, this.InputHeight
+            };
 
+            foreach (var input in inputs)
+            {
+                input.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+            }
         }
     }
 }

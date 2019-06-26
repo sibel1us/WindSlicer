@@ -8,24 +8,24 @@ using System.Windows.Data;
 
 namespace WindSlicer.Utilities.Converters
 {
-    public class IsSelectedConverter : IMultiValueConverter
+    public class NoConversionConverter : IValueConverter
     {
         public object Convert(
-            object[] values,
+            object value,
             Type targetType,
             object parameter,
             CultureInfo culture)
         {
-            return values.Length == 2 && values[0] == values[1];
+            return value;
         }
 
-        public object[] ConvertBack(
+        public object ConvertBack(
             object value,
-            Type[] targetTypes,
+            Type targetType,
             object parameter,
             CultureInfo culture)
         {
-            throw new NotImplementedException();
+            return value;
         }
     }
 }

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WindSlicer.Windows"
         xmlns:controls="clr-namespace:WindSlicer.Controls"
         mc:Ignorable="d"
-        Title="LayoutConfigurationWindow" Height="480" Width="640"
+        Title="LayoutConfigurationWindow" Height="720" Width="1280"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Grid>
         <Grid.ColumnDefinitions>

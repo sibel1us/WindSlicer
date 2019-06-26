@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,25 @@ namespace WindSlicer.Utilities
         public static IEnumerable<T> ValuesOf<T>() where T : Enum
         {
             return Enum.GetValues(typeof(T)).Cast<T>();
+        }
+
+        public static double? ParseDouble(object value)
+        {
+            var style = NumberStyles.Float;
+            var provider = CultureInfo.InvariantCulture;
+
+            switch (value)
+            {
+                case int i:
+                    return i;
+                case double d:
+                    return d;
+                case string s
+                when double.TryParse(s, style, provider, out double dOut):
+                    return dOut;
+                default:
+                    return null;
+            }
         }
     }
 }

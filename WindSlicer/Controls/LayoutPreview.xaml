@@ -15,15 +15,32 @@
              d:DesignHeight="450" d:DesignWidth="800"
              DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <UserControl.Resources>
-        <converters:RelativeSizeConverter x:Key="SizeConverter"/>
-        <Style TargetType="{x:Type FrameworkElement}" x:Key="ValidatingControl">
+        <converters:BindingProxy x:Key="Proxy" Data="{Binding}"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+        <converters:RelativeSizeConverter x:Key="RelativeSizeConverter"/>
+        <converters:PercentConverter x:Key="PercentConverter"/>
+        <converters:PixelConverter x:Key="PixelConverter"
+                                   Width="{Binding Data.ResolutionX, Source={StaticResource Proxy}}"
+                                   Height="{Binding Data.ResolutionY, Source={StaticResource Proxy}}"/>
+        <converters:RoutingConverter x:Key="PixelPercentConverter"
+                                     Condition="{Binding Data.UsePixels, Source={StaticResource Proxy}}"
+                                     TrueConverter="{StaticResource PixelConverter}"
+                                     FalseConverter="{StaticResource PercentConverter}"/>
+        <Style x:Key="ValidatingControl"
+               TargetType="{x:Type FrameworkElement}">
             <Style.Triggers>
                 <Trigger Property="Validation.HasError" Value="True">
-                    <Setter Property="ToolTip" Value="{Binding 
-                        Path=(Validation.Errors)[0].ErrorContent, 
-                        RelativeSource={x:Static RelativeSource.Self}}" />
+                    <Setter Property="ToolTip"
+                            Value="{Binding Path=(Validation.Errors)[0].ErrorContent,
+                                    RelativeSource={x:Static RelativeSource.Self}}" />
                 </Trigger>
             </Style.Triggers>
+        </Style>
+        <Style x:Key="ButtonStyle"
+               TargetType="{x:Type Button}">
+            <Setter Property="Padding" Value="8, 4, 8, 4"/>
+            <Setter Property="Margin" Value="0, 8, 8, 8"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
         </Style>
         <Style x:Key="InputField"
                BasedOn="{StaticResource ValidatingControl}"
@@ -32,14 +49,26 @@
         </Style>
         <Style x:Key="InputLabel"
                TargetType="{x:Type Label}">
-            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="UnitLabel"
+               TargetType="{x:Type Label}"
+               BasedOn="{StaticResource InputLabel}">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Content" Value="%"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding UsePixels}" Value="True">
+                    <Setter Property="Content" Value="px"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -48,16 +77,17 @@
         <Border Grid.Column="0"
                 Grid.RowSpan="2"
                 Margin="8,8,0,8"
-                BorderThickness="1"
-                Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"
+                BorderThickness="0"
                 BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}">
+            <!--Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"-->
+            <!--Preview container-->
             <Viewbox Stretch="Uniform"
-                     HorizontalAlignment="Left">
+                     HorizontalAlignment="Stretch">
                 <Canvas x:Name="Container"
                     Background="BlanchedAlmond"
                     SnapsToDevicePixels="True"
-                    Width="640"
-                    Height="360"/>
+                    Width="{Binding CanvasWidth}"
+                    Height="{Binding CanvasHeight}"/>
             </Viewbox>
         </Border>
         <Border x:Name="FormContainer"
@@ -66,16 +96,18 @@
                 Margin="8">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
+                <!--X-->
                 <Label Grid.Row="0"
                        Grid.Column="0"
                        Style="{StaticResource InputLabel}"
@@ -84,7 +116,15 @@
                          Grid.Row="0"
                          Grid.Column="1"
                          Style="{StaticResource InputField}"
-                         Text="{Binding SelectedArea.X, Mode=TwoWay, ValidatesOnDataErrors=True}"/>
+                         Text="{Binding SelectedArea.X,
+                                Converter={StaticResource PixelPercentConverter},
+                                Mode=TwoWay,
+                                ConverterParameter='Width',
+                                ValidatesOnDataErrors=True}"/>
+                <Label Grid.Row="0"
+                       Grid.Column="2"
+                       Style="{StaticResource UnitLabel}"/>
+                <!--Y-->
                 <Label Grid.Row="1"
                        Grid.Column="0"
                        Style="{StaticResource InputLabel}"
@@ -93,31 +133,55 @@
                          Grid.Row="1"
                          Grid.Column="1"
                          Style="{StaticResource InputField}"
-                         Text="{Binding SelectedArea.Y, Mode=TwoWay, ValidatesOnDataErrors=True}"/>
+                         Text="{Binding SelectedArea.Y,
+                                Converter={StaticResource PixelPercentConverter},
+                                Mode=TwoWay,
+                                ConverterParameter='Height',
+                                ValidatesOnDataErrors=True}"/>
+                <Label Grid.Row="1"
+                       Grid.Column="2"
+                       Style="{StaticResource UnitLabel}"/>
+                <!--Width-->
                 <Label Grid.Row="2"
                        Grid.Column="0"
+                       Style="{StaticResource InputLabel}"
                        Content="{ext:Display Width, {x:Type models:SnapAreaModel}}"/>
                 <TextBox x:Name="InputWidth"
                          Grid.Row="2"
                          Grid.Column="1"
                          Style="{StaticResource InputField}"
-                         Text="{Binding SelectedArea.Width, Mode=TwoWay, ValidatesOnDataErrors=True}"/>
+                         Text="{Binding SelectedArea.Width,
+                                Converter={StaticResource PixelPercentConverter},
+                                Mode=TwoWay,
+                                ConverterParameter='Width',
+                                ValidatesOnDataErrors=True}"/>
+                <Label Grid.Row="2"
+                       Grid.Column="2"
+                       Style="{StaticResource UnitLabel}"/>
+                <!--Height-->
                 <Label Grid.Row="3"
                        Grid.Column="0"
+                       Style="{StaticResource InputLabel}"
                        Content="{ext:Display Height, {x:Type models:SnapAreaModel}}"/>
                 <TextBox x:Name="InputHeight"
                          Grid.Row="3"
                          Grid.Column="1"
                          Style="{StaticResource InputField}"
-                         Text="{Binding SelectedArea.Height, Mode=TwoWay, ValidatesOnDataErrors=True}"/>
-                 <Button x:Name="UpdateButton"
+                         Text="{Binding SelectedArea.Height,
+                                Converter={StaticResource PixelPercentConverter},
+                                Mode=TwoWay,
+                                ConverterParameter='Height',
+                                ValidatesOnDataErrors=True}"/>
+                <Label Grid.Row="3"
+                       Grid.Column="2"
+                       Style="{StaticResource UnitLabel}"/>
+                <!--Button-->
+                <Button x:Name="UpdateButton"
                         Grid.Row="4"
                         Grid.Column="1"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        Click="UpdateButton_Click">
-                    Update
-                </Button>
+                        Style="{StaticResource ButtonStyle}"
+                        Click="UpdateButton_Click"
+                        Content="Update"/>
             </Grid>
         </Border>
         <ListBox x:Name="ItemListBox"
@@ -129,5 +193,26 @@
                  Margin="8"
                  MinWidth="160">
         </ListBox>
+        <DockPanel Grid.Row="3"
+                   Grid.Column="0"
+                   Margin="8,0,8,8"
+                   VerticalAlignment="Center">
+            <CheckBox VerticalContentAlignment="Center"
+                      DockPanel.Dock="Top"
+                      IsChecked="{Binding UsePixels}">
+                <Label Content="{ext:Display UsePixels, {x:Type local:LayoutPreview}}"/>
+            </CheckBox>
+            <Border DockPanel.Dock="Left">
+                <Label>ayy</Label>
+            </Border>
+        </DockPanel>
+        <DockPanel Grid.Row="3"
+                   Grid.Column="1"
+                   LastChildFill="False">
+            <Button DockPanel.Dock="Right"
+                    Style="{StaticResource ButtonStyle}">Cancel</Button>
+            <Button DockPanel.Dock="Right"
+                    Style="{StaticResource ButtonStyle}">OK</Button>
+        </DockPanel>
     </Grid>
 </UserControl>
