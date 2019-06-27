@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindSlicer.Models;
+using WindSlicer.Utilities.Extensions;
 
 namespace WindSlicer.Services
 {
@@ -64,6 +65,30 @@ namespace WindSlicer.Services
             public Rectangle WorkingArea => this.screen.WorkingArea;
             public string DeviceName => this.screen.DeviceName;
             public bool Primary => this.screen.Primary;
+
+            public bool Editable => false;
+            public int Width
+            {
+                get => this.screen.Bounds.Width;
+                set { }
+            }
+            public int Height
+            {
+                get => this.screen.Bounds.Height;
+                set { }
+            }
+
+            public AnchorStyles TaskbarLocation
+            {
+                get => this.screen.GetTaskbarLocation();
+                set { }
+            }
+
+            public int TaskbarSize
+            {
+                get => this.screen.GetTaskbarSize();
+                set { }
+            }
         }
     }
 }

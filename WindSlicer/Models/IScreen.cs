@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -17,5 +18,19 @@ namespace WindSlicer.Models
         Rectangle WorkingArea { get; }
         string DeviceName { get; }
         bool Primary { get; }
+
+        bool Editable { get; }
+
+        [Display(Name = "Width")]
+        int Width { get; set; }
+
+        [Display(Name = "Height")]
+        int Height { get; set; }
+
+        [Display(Name = "Taskbar")]
+        AnchorStyles TaskbarLocation { get; set; }
+
+        [Display(Name = "Taskbar Size")]
+        int TaskbarSize { get; set; }
     }
 }

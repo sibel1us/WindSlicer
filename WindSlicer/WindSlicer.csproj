@@ -82,7 +82,9 @@
     <Compile Include="Services\ScreenManager.cs" />
     <Compile Include="Services\ScreenService.cs" />
     <Compile Include="Utilities\BindingProxy.cs" />
+    <Compile Include="Utilities\Converters\ColorLightnessConverter.cs" />
     <Compile Include="Utilities\Converters\ConditionalValueConverter.cs" />
+    <Compile Include="Utilities\Converters\CyclingConverter.cs" />
     <Compile Include="Utilities\Converters\NotNullConverter.cs" />
     <Compile Include="Utilities\Converters\RoutingConverter.cs" />
     <Compile Include="Utilities\Converters\AllValuesEqualConverter.cs" />

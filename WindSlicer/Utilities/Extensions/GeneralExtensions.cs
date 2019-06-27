@@ -20,6 +20,11 @@ namespace WindSlicer.Utilities.Extensions
             return @this.HasFlag(flag);
         }
 
+        public static int Limit(this int @this, int min, int max)
+        {
+            return Math.Min(max, Math.Max(min, @this));
+        }
+
         /// <summary>
         /// Returns the double rounded to the nearest integer.
         /// </summary>
@@ -63,6 +68,26 @@ namespace WindSlicer.Utilities.Extensions
         public static AnchorStyles GetTaskbarLocation(this Screen @this)
         {
             return InternalGetTaskbarLocation(@this.Bounds, @this.WorkingArea);
+        }
+
+        public static int GetTaskbarSize(this Screen @this)
+        {
+            var bounds = @this.Bounds;
+            var workingArea = @this.WorkingArea;
+
+            switch (GetTaskbarLocation(@this))
+            {
+                case AnchorStyles.Top:
+                    return workingArea.Top - bounds.Top;
+                case AnchorStyles.Bottom:
+                    return bounds.Bottom - workingArea.Bottom;
+                case AnchorStyles.Left:
+                    return workingArea.Left - bounds.Left;
+                case AnchorStyles.Right:
+                    return bounds.Right - workingArea.Right;
+                default:
+                    return 0;
+            }
         }
 
         private static AnchorStyles InternalGetTaskbarLocation(

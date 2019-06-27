@@ -8,13 +8,17 @@
              xmlns:local="clr-namespace:WindSlicer.Controls"
              xmlns:models="clr-namespace:WindSlicer.Models"
              xmlns:debug="clr-namespace:System.Diagnostics;assembly=System"
+             xmlns:controls="clr-namespace:WindSlicer.Controls"
              xmlns:converters="clr-namespace:WindSlicer.Utilities.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="128" d:DesignWidth="128"
              MouseDown="Control_MouseDown"
              IsHitTestVisible="True"
+             Loaded="SnapAreaControl_Loaded"
              DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <UserControl.Resources>
+        <converters:ColorLightnessConverter x:Key="ColorLightnessConverter"/>
+        <converters:CyclingConverter x:Key="CyclingConverter"/>
         <converters:RelativeSizeConverter x:Key="RelativeSizeConverter"/>
         <converters:AllValuesEqualConverter x:Key="SelectedConverter"/>
         <converters:ConditionalValueConverter x:Key="ConditionalValueConverter"/>
@@ -41,12 +45,19 @@
         </MultiBinding>
     </Canvas.Top>
     <Rectangle x:Name="Root"
-               Fill="Blue"
-               Stroke="Black">
+               StrokeThickness="2"
+               Stroke="{Binding Fill, RelativeSource={RelativeSource Self}, Converter={StaticResource ColorLightnessConverter}, ConverterParameter=0.5}">
         <Rectangle.Resources>
             <system:Double x:Key="NormalOpacity">0.5</system:Double>
             <system:Double x:Key="SelectedOpacity">1.0</system:Double>
         </Rectangle.Resources>
+        <Rectangle.Fill>
+            <MultiBinding Converter="{StaticResource CyclingConverter}">
+                <Binding Source="{x:Static controls:SnapAreaPreview.ColorCycle}"/>
+                <Binding Path="Model"/>
+                <Binding Path="Layout.AreaListBox.ItemsSource"/>
+            </MultiBinding>
+        </Rectangle.Fill>
         <Rectangle.Opacity>
             <MultiBinding Converter="{StaticResource ConditionalValueConverter}">
                 <Binding Path="IsEnabled" ElementName="Root"/>

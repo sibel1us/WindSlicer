@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,10 +19,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WindSlicer.Models;
 using WindSlicer.Services;
-using WindSlicer.Utilities.Converters;
 using WindSlicer.Utilities.Extensions;
-using Screen = System.Windows.Forms.Screen;
-using AnchorStyles = System.Windows.Forms.AnchorStyles;
 
 namespace WindSlicer.Controls
 {
@@ -62,7 +58,18 @@ namespace WindSlicer.Controls
                 {
                     this.m_selectedArea = value;
                     this.OnPropertyChanged();
+                    this.OnPropertyChanged(nameof(SelectedAreaControl));
                 }
+            }
+        }
+
+        public SnapAreaPreview SelectedAreaControl
+        {
+            get
+            {
+                return this.Container.Children
+                    .OfType<SnapAreaPreview>()
+                    .FirstOrDefault(x => x.Model == this.SelectedArea);
             }
         }
 
@@ -123,12 +130,13 @@ namespace WindSlicer.Controls
 
         public LayoutPreview()
         {
-            this.InitializeComponent();
-
+            // Add screens to the screen list. Default selection is set in Control_Loaded
             this.ScreenList
                 .AddRange(this.ScreenService.Screens)
                 .Insert(0, this.CustomScreen);
-            this.SelectedScreen = this.CustomScreen;
+
+            this.InitializeComponent();
+
 
             // Initialize event handlers
             this.CustomScreen.PropertyChanged += this.CustomScreen_PropertyChanged;
@@ -152,28 +160,34 @@ namespace WindSlicer.Controls
             });
         }
 
+        /// <summary>
+        /// Clear all screens except the custom one when screens change.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ScreenService_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             this.SelectedScreen = this.ScreenList.FirstOrDefault();
 
-            for (int i = this.ScreenList.Count; i > 0; i--)
+            for (int i = this.ScreenList.Count; i >= 0; i--)
             {
-                this.ScreenList.RemoveAt(i);
+                if (!(this.ScreenList.ElementAtOrDefault(i) is MockScreen))
+                    this.ScreenList.RemoveAt(i);
             }
         }
 
+        /// <summary>
+        /// Update the screen/taskbar preview.
+        /// </summary>
         private void UpdateScreen()
         {
-            if (this.SelectedScreen.GetTaskbarLocation() != AnchorStyles.None)
-            {
-                var bounds = this.SelectedScreen.Bounds;
-                var workingArea = this.SelectedScreen.WorkingArea;
+            var bounds = this.SelectedScreen.Bounds;
+            var workingArea = this.SelectedScreen.WorkingArea;
 
-                this.TaskBarTop.Height = workingArea.Top - bounds.Top;
-                this.TaskBarBottom.Height = bounds.Bottom - workingArea.Bottom;
-                this.TaskBarLeft.Width = workingArea.Left - bounds.Left;
-                this.TaskBarRight.Width = bounds.Right - workingArea.Right;
-            }
+            this.TaskBarTop.Height = workingArea.Top - bounds.Top;
+            this.TaskBarBottom.Height = bounds.Bottom - workingArea.Bottom;
+            this.TaskBarLeft.Width = bounds.Right - workingArea.Right;
+            this.TaskBarRight.Width = workingArea.Left - bounds.Left;
 
             this.OnPropertyChanged("");
         }
@@ -234,6 +248,11 @@ namespace WindSlicer.Controls
             }
         }
 
+        /// <summary>
+        /// Update screen/taskbar preview when custom screen is edited.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CustomScreen_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (this.CustomScreen == this.SelectedScreen)
@@ -262,7 +281,7 @@ namespace WindSlicer.Controls
 
         private void LayoutPreviewControl_Loaded(object sender, RoutedEventArgs e)
         {
-            this.SelectedScreen = this.ScreenService.PrimaryScreen;
+            this.SelectedScreen = this.ScreenList.FirstOrDefault();
         }
     }
 }

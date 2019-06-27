@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WindSlicer.Controls"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:models="clr-namespace:WindSlicer.Models"
              xmlns:controls="clr-namespace:WindSlicer.Controls"
              xmlns:ext="clr-namespace:WindSlicer.Utilities.Extensions"
@@ -19,6 +20,8 @@
     <UserControl.Resources>
         <util:BindingProxy x:Key="Proxy" Data="{Binding}"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+        <converters:CyclingConverter x:Key="CyclingConverter"/>
+        <converters:ColorLightnessConverter x:Key="ColorLightnessConverter"/>
         <converters:NotNullConverter x:Key="NotNullConverter"/>
         <converters:ScreenNameConverter x:Key="ScreenNameConverter"/>
         <converters:RelativeSizeConverter x:Key="RelativeSizeConverter"/>
@@ -46,11 +49,20 @@
             <Setter Property="Margin" Value="0, 8, 8, 8"/>
             <Setter Property="VerticalAlignment" Value="Bottom"/>
         </Style>
-        <Style x:Key="InputField"
+        <Style x:Key="InputFieldBase"
                BasedOn="{StaticResource ValidatingControl}"
                TargetType="{x:Type TextBox}">
             <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="InputField"
+               BasedOn="{StaticResource InputFieldBase}"
+               TargetType="{x:Type TextBox}">
             <Setter Property="IsEnabled" Value="{Binding SelectedArea, Converter={StaticResource NotNullConverter}}"/>
+        </Style>
+        <Style x:Key="ScreenInputField"
+               BasedOn="{StaticResource InputFieldBase}"
+               TargetType="{x:Type TextBox}">
+            
         </Style>
         <Style x:Key="InputLabel"
                TargetType="{x:Type Label}">
@@ -120,9 +132,9 @@
             </Viewbox>
         </Border>
         <StackPanel x:Name="FormContainer"
-                Grid.Column="1"
-                Grid.Row="0"
-                Margin="8">
+                    Grid.Column="1"
+                    Grid.Row="0"
+                    Margin="8">
             <CheckBox HorizontalAlignment="Center"
                       VerticalContentAlignment="Center"
                       IsChecked="{Binding UsePixels}">
@@ -224,27 +236,114 @@
                  Grid.Row="1"
                  ItemsSource="{Binding Model.Areas}"
                  SelectedItem="{Binding Path=SelectedArea, Mode=TwoWay}"
-                 DisplayMemberPath="DisplayString"
                  Margin="8"
                  MinWidth="160">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Rectangle Width="16"
+                                   Height="16"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"
+                                   Stroke="{Binding Fill, RelativeSource={RelativeSource Self}, Converter={StaticResource ColorLightnessConverter}, ConverterParameter=0.5}">
+                            <Rectangle.Fill>
+                                <MultiBinding Converter="{StaticResource CyclingConverter}">
+                                    <Binding Source="{x:Static controls:SnapAreaPreview.ColorCycle}"/>
+                                    <Binding Path=""/>
+                                    <Binding Path="AreaListBox.ItemsSource" ElementName="LayoutPreviewControl"/>
+                                </MultiBinding>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding DisplayString}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
         </ListBox>
-        <StackPanel Grid.Row="3"
-                   Grid.Column="0"
-                   Margin="8,0,8,8"
-                   VerticalAlignment="Center">
-            <CheckBox VerticalContentAlignment="Center"
-                      IsChecked="{Binding ShowTaskbar}">
-                <Label Content="{ext:Display ShowTaskbar, {x:Type local:LayoutPreview}}"/>
-            </CheckBox>
-            <ComboBox ItemsSource="{Binding ScreenList}"
-                     SelectedItem="{Binding SelectedScreen, Mode=TwoWay}">
+        <Grid Grid.Row="3"
+              Grid.Column="0"
+              Margin="8,0,8,8"
+              VerticalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <ComboBox Grid.Row="0"
+                      Grid.Column="0"
+                      x:Name="ScreenComboBox"
+                      ItemsSource="{Binding ScreenList}"
+                      SelectedItem="{Binding SelectedScreen, Mode=TwoWay}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Path=., Converter={StaticResource ScreenNameConverter}}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-        </StackPanel>
+            <CheckBox Grid.Row="1"
+                      Grid.Column="0"
+                      VerticalContentAlignment="Center"
+                      IsChecked="{Binding ShowTaskbar}">
+                <Label Content="{ext:Display ShowTaskbar, {x:Type local:LayoutPreview}}"/>
+            </CheckBox>
+            <Grid Grid.Row="0"
+                  Grid.RowSpan="2"
+                  Grid.Column="1"
+                  Margin="8,0,0,0"
+                  IsEnabled="{Binding SelectedScreen.Editable}">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Row="0"
+                       Grid.Column="0"
+                       Style="{StaticResource InputLabel}"
+                       Content="{ext:Display Width, {x:Type models:IScreen}}"/>
+                <TextBox Grid.Row="0"
+                         Grid.Column="1"
+                         Style="{StaticResource ScreenInputField}"
+                         Text="{Binding SelectedScreen.Width, Mode=TwoWay}"/>
+                <Label Grid.Row="1"
+                       Grid.Column="0"
+                       Style="{StaticResource InputLabel}"
+                       Content="{ext:Display Height, {x:Type models:IScreen}}"/>
+                <TextBox Grid.Row="1"
+                         Grid.Column="1"
+                         Style="{StaticResource ScreenInputField}"
+                         Text="{Binding SelectedScreen.Height, Mode=TwoWay}"/>
+                <Label Grid.Row="0"
+                       Grid.Column="2"
+                       Style="{StaticResource InputLabel}"
+                       Content="{ext:Display TaskbarLocation, {x:Type models:IScreen}}"/>
+                <ComboBox Grid.Row="0"
+                          Grid.Column="3"
+                          VerticalContentAlignment="Center"
+                          ItemsSource="{Binding Source={x:Static models:MockScreen.TaskbarLocations}}"
+                          SelectedItem="{Binding SelectedScreen.TaskbarLocation, Mode=TwoWay}"/>
+                <Label Grid.Row="1"
+                       Grid.Column="2"
+                       Style="{StaticResource InputLabel}"
+                       Content="{ext:Display TaskbarSize, {x:Type models:IScreen}}"/>
+                <TextBox Grid.Row="1"
+                         Grid.Column="3"
+                         Style="{StaticResource ScreenInputField}"
+                         Text="{Binding SelectedScreen.TaskbarSize, Mode=TwoWay}"/>
+            </Grid>
+        </Grid>
         <DockPanel Grid.Row="3"
                    Grid.Column="1"
                    LastChildFill="False">

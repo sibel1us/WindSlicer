@@ -45,16 +45,16 @@ namespace WindSlicer.Controls
         public Rectangle RootRectangle => this.Root;
         public LayoutPreview Layout => this.FindParent<LayoutPreview>();
 
+        public static readonly IEnumerable<Brush> ColorCycle = new List<Brush>
+        {
+            Brushes.LightGreen,
+            Brushes.LightBlue,
+            Brushes.RosyBrown
+        };
+
         public SnapAreaPreview()
         {
-            InitializeComponent();
-        }
-
-        protected override void OnRender(DrawingContext drawingContext)
-        {
-            //OnPropertyChanged(x => x.Container);
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(""));
-            base.OnRender(drawingContext);
+            this.InitializeComponent();
         }
 
         protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
@@ -69,6 +69,11 @@ namespace WindSlicer.Controls
                 this.Layout.SelectedArea = this.Model;
                 e.Handled = true;
             }
+        }
+
+        private void SnapAreaControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.OnPropertyChanged("");
         }
     }
 }
