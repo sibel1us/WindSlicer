@@ -78,64 +78,98 @@ namespace WindSlicer.Models
         private double m_height;
 
         [Display(Name = "Left")]
-        [Range(MIN_VALUE, MAX_VALUE)]
         public double X
         {
             get => this.m_x;
             set
             {
-                if (!value.Equals5Digits(this.m_x))
+                var newValue = value.Limit(
+                    MIN_VALUE,
+                    this.AutoAdjust ? MAX_VALUE : MAX_VALUE - this.Width);
+
+                if (!newValue.Equals5Digits(this.m_x))
                 {
-                    this.m_x = value;
-                    this.UpdatedXAxis();
+                    this.m_x = newValue;
+                    this.OnPropertyChanged();
+                    this.OnPropertyChanged(nameof(DisplayString));
+
+                    if (this.AutoAdjust && this.X + this.Width > MAX_VALUE)
+                    {
+                        this.Width = MAX_VALUE - this.X;
+                    }
                 }
             }
         }
 
         [Display(Name = "Top")]
-        [Range(MIN_VALUE, MAX_VALUE)]
         public double Y
         {
             get => this.m_y;
             set
             {
-                if (!value.Equals5Digits(this.m_y))
+                var newValue = value.Limit(
+                    MIN_VALUE,
+                    this.AutoAdjust ? MAX_VALUE : MAX_VALUE - this.Height);
+
+                if (!newValue.Equals5Digits(this.m_y))
                 {
-                    this.m_y = value;
-                    this.UpdatedYAxis();
+                    this.m_y = newValue;
+                    this.OnPropertyChanged();
+                    this.OnPropertyChanged(nameof(DisplayString));
+
+                    if (this.AutoAdjust && this.Y + this.Height > MAX_VALUE)
+                    {
+                        this.Height = MAX_VALUE - this.Y;
+                    }
                 }
             }
         }
 
         [Display(Name = "Width")]
-        [Range(MIN_VALUE, MAX_VALUE)]
         public double Width
         {
             get => this.m_width;
             set
             {
-                if (!value.Equals5Digits(this.m_width))
+                var newValue = value.Limit(MIN_VALUE, MAX_VALUE - this.X);
+
+                if (!newValue.Equals5Digits(this.m_width))
                 {
-                    this.m_width = value;
-                    this.UpdatedXAxis();
+                    this.m_width = newValue;
+                    this.OnPropertyChanged();
+                    this.OnPropertyChanged(nameof(DisplayString));
+
+                    if (this.AutoAdjust && this.Width + this.X > MAX_VALUE)
+                    {
+                        this.X = MAX_VALUE - this.Width;
+                    }
                 }
             }
         }
 
         [Display(Name = "Height")]
-        [Range(MIN_VALUE, MAX_VALUE)]
         public double Height
         {
             get => this.m_height;
             set
             {
-                if (!value.Equals5Digits(this.m_height))
+                var newValue = value.Limit(MIN_VALUE, MAX_VALUE - this.Y);
+
+                if (!newValue.Equals5Digits(this.m_height))
                 {
-                    this.m_height = value;
-                    this.UpdatedYAxis();
+                    this.m_height = newValue;
+                    this.OnPropertyChanged();
+                    this.OnPropertyChanged(nameof(DisplayString));
+
+                    if (this.AutoAdjust && this.Height + this.Y > MAX_VALUE)
+                    {
+                        this.Y = MAX_VALUE - this.Height;
+                    }
                 }
             }
         }
+
+        public bool AutoAdjust => false;
 
         /// <summary>
         /// Initializes a new model for a snap area.
@@ -192,22 +226,6 @@ namespace WindSlicer.Models
 
             return $"X:{td(this.X)}, Y:{td(this.Y)}, W:{td(this.Width)}, H:{td(this.Height)}";
         }
-
-        private void UpdatedXAxis()
-        {
-            this.OnPropertyChanged(nameof(X));
-            this.OnPropertyChanged(nameof(Width));
-            this.OnPropertyChanged(nameof(DisplayString));
-        }
-
-        private void UpdatedYAxis()
-        {
-            this.OnPropertyChanged(nameof(Y));
-            this.OnPropertyChanged(nameof(Height));
-            this.OnPropertyChanged(nameof(DisplayString));
-        }
-
-        private double Constrain(double value) => Math.Max(MIN_VALUE, Math.Min(MIN_VALUE, value));
 
         private bool IsInvalid(double value) => value < MIN_VALUE || value > MAX_VALUE;
     }

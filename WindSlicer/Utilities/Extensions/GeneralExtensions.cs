@@ -25,6 +25,11 @@ namespace WindSlicer.Utilities.Extensions
             return Math.Min(max, Math.Max(min, @this));
         }
 
+        public static double Limit(this double @this, double min, double max)
+        {
+            return Math.Min(max, Math.Max(min, @this));
+        }
+
         /// <summary>
         /// Returns the double rounded to the nearest integer.
         /// </summary>
