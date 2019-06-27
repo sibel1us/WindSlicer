@@ -236,13 +236,14 @@
                       IsChecked="{Binding ShowTaskbar}">
                 <Label Content="{ext:Display ShowTaskbar, {x:Type local:LayoutPreview}}"/>
             </CheckBox>
-            <ListBox ItemsSource="{Binding ScreenService.Screens}">
-                <ListBox.ItemTemplate>
+            <ComboBox ItemsSource="{Binding ScreenList}"
+                     SelectedItem="{Binding SelectedScreen, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Path=., Converter={StaticResource ScreenNameConverter}}"/>
                     </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
         </StackPanel>
         <DockPanel Grid.Row="3"
                    Grid.Column="1"

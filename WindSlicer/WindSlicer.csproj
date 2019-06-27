@@ -78,6 +78,7 @@
       <DependentUpon>SnapAreaPreview.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\IScreen.cs" />
+    <Compile Include="Models\MockScreen.cs" />
     <Compile Include="Services\ScreenManager.cs" />
     <Compile Include="Services\ScreenService.cs" />
     <Compile Include="Utilities\BindingProxy.cs" />

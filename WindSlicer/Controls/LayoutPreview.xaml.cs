@@ -73,12 +73,17 @@ namespace WindSlicer.Controls
             {
                 if (value != this.m_selectedScreen)
                 {
-                    this.m_selectedScreen = value;
+                    this.m_selectedScreen = value ?? this.ScreenList.FirstOrDefault();
                     this.OnPropertyChanged();
                     this.UpdateScreen();
                 }
             }
         }
+
+        public MockScreen CustomScreen { get; } = MockScreen.Default;
+
+        public ObservableCollection<IScreen> ScreenList { get; }
+            = new ObservableCollection<IScreen>();
 
         public Canvas AreaContainer => this.Container;
         public ListBox AreaListBox => this.ItemListBox;
@@ -120,7 +125,14 @@ namespace WindSlicer.Controls
         {
             this.InitializeComponent();
 
+            this.ScreenList
+                .AddRange(this.ScreenService.Screens)
+                .Insert(0, this.CustomScreen);
+            this.SelectedScreen = this.CustomScreen;
+
             // Initialize event handlers
+            this.CustomScreen.PropertyChanged += this.CustomScreen_PropertyChanged;
+            this.ScreenService.PropertyChanged += this.ScreenService_PropertyChanged;
             this.Model.Areas.CollectionChanged += this.Areas_CollectionChanged;
 
             this.Model.Areas.Add(new SnapAreaModel
@@ -140,6 +152,16 @@ namespace WindSlicer.Controls
             });
         }
 
+        private void ScreenService_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            this.SelectedScreen = this.ScreenList.FirstOrDefault();
+
+            for (int i = this.ScreenList.Count; i > 0; i--)
+            {
+                this.ScreenList.RemoveAt(i);
+            }
+        }
+
         private void UpdateScreen()
         {
             if (this.SelectedScreen.GetTaskbarLocation() != AnchorStyles.None)
@@ -152,6 +174,8 @@ namespace WindSlicer.Controls
                 this.TaskBarLeft.Width = workingArea.Left - bounds.Left;
                 this.TaskBarRight.Width = bounds.Right - workingArea.Right;
             }
+
+            this.OnPropertyChanged("");
         }
 
         private void AddItems(IEnumerable<SnapAreaModel> items)
@@ -207,6 +231,14 @@ namespace WindSlicer.Controls
                     this.ClearItems();
                     this.AddItems(e.NewItems.OfType<SnapAreaModel>());
                     break;
+            }
+        }
+
+        private void CustomScreen_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (this.CustomScreen == this.SelectedScreen)
+            {
+                this.UpdateScreen();
             }
         }
 
