@@ -77,15 +77,18 @@
     <Compile Include="Controls\SnapAreaPreview.xaml.cs">
       <DependentUpon>SnapAreaPreview.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\IScreen.cs" />
     <Compile Include="Services\ScreenManager.cs" />
-    <Compile Include="Utilities\Converters\BindingProxy.cs" />
+    <Compile Include="Services\ScreenService.cs" />
+    <Compile Include="Utilities\BindingProxy.cs" />
     <Compile Include="Utilities\Converters\ConditionalValueConverter.cs" />
+    <Compile Include="Utilities\Converters\NotNullConverter.cs" />
     <Compile Include="Utilities\Converters\RoutingConverter.cs" />
     <Compile Include="Utilities\Converters\AllValuesEqualConverter.cs" />
-    <Compile Include="Utilities\Converters\NoConversionConverter.cs" />
     <Compile Include="Utilities\Converters\PercentConverter.cs" />
     <Compile Include="Utilities\Converters\PixelConverter.cs" />
     <Compile Include="Utilities\Converters\RelativeSizeConverter.cs" />
+    <Compile Include="Utilities\Converters\ScreenNameConverter.cs" />
     <Compile Include="Utilities\Extensions\DisplayExtension.cs" />
     <Compile Include="Utilities\Extensions\GeneralExtensions.cs" />
     <Compile Include="Models\LayoutModel.cs" />

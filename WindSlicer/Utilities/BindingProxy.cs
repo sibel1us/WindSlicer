@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace WindSlicer.Utilities.Converters
+namespace WindSlicer.Utilities
 {
     /// <summary>
     /// Used to bind to values from objects out visual/logical tree.
@@ -16,11 +16,6 @@ namespace WindSlicer.Utilities.Converters
     /// </remarks>
     public class BindingProxy : Freezable
     {
-        protected override Freezable CreateInstanceCore()
-        {
-            return new BindingProxy();
-        }
-
         public object Data
         {
             get => GetValue(DataProperty);
@@ -33,5 +28,10 @@ namespace WindSlicer.Utilities.Converters
                 typeof(object),
                 typeof(BindingProxy),
                 new UIPropertyMetadata(null));
+
+        protected override Freezable CreateInstanceCore()
+        {
+            return new BindingProxy();
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -34,10 +35,9 @@ namespace WindSlicer.Windows
             InitializeComponent();
         }
 
-        protected void OnPropertyChanged<T>(
-            Expression<Func<LayoutConfigurationWindow, T>> expression)
+        protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
         {
-            PropertyChanged?.InvokeFor(expression);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

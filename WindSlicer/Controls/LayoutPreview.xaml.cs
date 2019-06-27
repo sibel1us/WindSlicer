@@ -22,6 +22,8 @@ using WindSlicer.Models;
 using WindSlicer.Services;
 using WindSlicer.Utilities.Converters;
 using WindSlicer.Utilities.Extensions;
+using Screen = System.Windows.Forms.Screen;
+using AnchorStyles = System.Windows.Forms.AnchorStyles;
 
 namespace WindSlicer.Controls
 {
@@ -32,15 +34,11 @@ namespace WindSlicer.Controls
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private const double MAX_WIDTH = 1280.0;
-        private const double MAX_HEIGHT = 720.0;
-        private const double DEFAULT_ASPECT = MAX_WIDTH / MAX_HEIGHT;
-
         private LayoutModel m_model = new LayoutModel { Name = "layout name" };
         private SnapAreaModel m_selectedArea = null;
-        private bool m_usePixels = false;
-        private int m_resX = 0;
-        private int m_resY = 0;
+        private IScreen m_selectedScreen = null;
+        private bool m_usePixels = true;
+        private bool m_showTaskbar = true;
 
         public LayoutModel Model
         {
@@ -68,6 +66,20 @@ namespace WindSlicer.Controls
             }
         }
 
+        public IScreen SelectedScreen
+        {
+            get => this.m_selectedScreen;
+            set
+            {
+                if (value != this.m_selectedScreen)
+                {
+                    this.m_selectedScreen = value;
+                    this.OnPropertyChanged();
+                    this.UpdateScreen();
+                }
+            }
+        }
+
         public Canvas AreaContainer => this.Container;
         public ListBox AreaListBox => this.ItemListBox;
 
@@ -80,83 +92,33 @@ namespace WindSlicer.Controls
                 if (value != this.m_usePixels)
                 {
                     this.m_usePixels = value;
-                    this.OnPropertyChanged();
+
+                    // Force X/Y/Width/Height to update
                     this.OnPropertyChanged("");
                 }
             }
         }
 
-        [Display(Name = "Resolution Width")]
-        public int ResolutionX
+        [Display(Name = "Show Taskbar")]
+        public bool ShowTaskbar
         {
-            get => this.m_resX;
+            get => this.m_showTaskbar;
             set
             {
-                if (value > 0 && value != m_resX)
+                if (value != this.m_showTaskbar)
                 {
-                    this.m_resX = value;
+                    this.m_showTaskbar = value;
                     this.OnPropertyChanged();
-                    this.OnPropertyChanged(nameof(CanvasWidth));
-                    this.OnPropertyChanged(nameof(CanvasHeight));
+                    this.UpdateScreen();
                 }
             }
         }
 
-        [Display(Name = "Resolution Height")]
-        public int ResolutionY
-        {
-            get => this.m_resY;
-            set
-            {
-                if (value > 0 && value != m_resY)
-                {
-                    this.m_resY = value;
-                    this.OnPropertyChanged();
-                    this.OnPropertyChanged(nameof(CanvasWidth));
-                    this.OnPropertyChanged(nameof(CanvasHeight));
-                }
-            }
-        }
-
-        public double AspectRatio => this.ResolutionX / (double)this.ResolutionY;
-
-        public double CanvasWidth
-        {
-            get
-            {
-                if (this.AspectRatio == double.NaN || this.AspectRatio > DEFAULT_ASPECT)
-                {
-                    return MAX_WIDTH;
-                }
-                else
-                {
-                    return MAX_WIDTH / this.AspectRatio;
-                }
-            }
-        }
-
-        public double CanvasHeight
-        {
-            get
-            {
-                if (this.AspectRatio == double.NaN || this.AspectRatio <= DEFAULT_ASPECT)
-                {
-                    return MAX_HEIGHT;
-                }
-                else
-                {
-                    return MAX_HEIGHT / this.AspectRatio;
-                }
-            }
-        }
+        public ScreenService ScreenService { get; } = new ScreenService();
 
         public LayoutPreview()
         {
             this.InitializeComponent();
-
-            // TODO: taskbar location
-            this.ResolutionX = ScreenManager.PrimaryScreen.WorkingArea.Width;
-            this.ResolutionY = ScreenManager.PrimaryScreen.WorkingArea.Height;
 
             // Initialize event handlers
             this.Model.Areas.CollectionChanged += this.Areas_CollectionChanged;
@@ -176,6 +138,20 @@ namespace WindSlicer.Controls
                 X = 0.75,
                 Y = 0.65
             });
+        }
+
+        private void UpdateScreen()
+        {
+            if (this.SelectedScreen.GetTaskbarLocation() != AnchorStyles.None)
+            {
+                var bounds = this.SelectedScreen.Bounds;
+                var workingArea = this.SelectedScreen.WorkingArea;
+
+                this.TaskBarTop.Height = workingArea.Top - bounds.Top;
+                this.TaskBarBottom.Height = bounds.Bottom - workingArea.Bottom;
+                this.TaskBarLeft.Width = workingArea.Left - bounds.Left;
+                this.TaskBarRight.Width = bounds.Right - workingArea.Right;
+            }
         }
 
         private void AddItems(IEnumerable<SnapAreaModel> items)
@@ -250,6 +226,11 @@ namespace WindSlicer.Controls
             {
                 input.GetBindingExpression(TextBox.TextProperty).UpdateSource();
             }
+        }
+
+        private void LayoutPreviewControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.SelectedScreen = this.ScreenService.PrimaryScreen;
         }
     }
 }

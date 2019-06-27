@@ -5,10 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Windows.Forms;
+using WindSlicer.Models;
 
 namespace WindSlicer.Utilities.Converters
 {
-    public class NoConversionConverter : IValueConverter
+    public class ScreenNameConverter : IValueConverter
     {
         public object Convert(
             object value,
@@ -16,7 +18,17 @@ namespace WindSlicer.Utilities.Converters
             object parameter,
             CultureInfo culture)
         {
-            return value;
+            if (value is IScreen screen)
+            {
+                var display = $"{screen.DeviceName} {screen.Bounds.Width}x{screen.Bounds.Height}";
+
+                if (screen.Primary)
+                    display += " (Primary)";
+
+                return display;
+            }
+
+            return "";
         }
 
         public object ConvertBack(
@@ -25,7 +37,7 @@ namespace WindSlicer.Utilities.Converters
             object parameter,
             CultureInfo culture)
         {
-            return value;
+            throw new NotImplementedException();
         }
     }
 }

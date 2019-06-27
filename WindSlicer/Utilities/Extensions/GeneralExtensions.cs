@@ -1,24 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using WindSlicer.Models;
 
 namespace WindSlicer.Utilities.Extensions
 {
     public static class GeneralExtensions
     {
+        public static bool Has<TEnum>(this TEnum @this, TEnum flag)
+            where TEnum : Enum
+        {
+            return @this.HasFlag(flag);
+        }
+
         /// <summary>
         /// Returns the double rounded to the nearest integer.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Round(this double @this)
         {
-            // TODO
-            return (int)Math.Floor(@this + 0.5);
+            return (int)(@this + 0.5);
         }
 
         /// <summary>
@@ -39,21 +47,55 @@ namespace WindSlicer.Utilities.Extensions
             return Math.Abs(@this - other) < 0.00001;
         }
 
-        /// <summary>
-        /// Invokes the event for the target of the member expression.
-        /// </summary>
-        public static void InvokeFor<T, TProp>(
-            this PropertyChangedEventHandler handler,
-            Expression<Func<T, TProp>> expression)
+        public static Rectangle GetTaskbar(this Screen @this)
         {
-            if (handler != null)
-            {
-                var memExp = expression.Body as MemberExpression
-                    ?? (expression.Body as UnaryExpression)?.Operand as MemberExpression
-                    ?? throw new InvalidCastException("Cannot get property name");
+            if (@this == null)
+                throw new NullReferenceException(nameof(@this));
 
-                handler.Invoke(null, new PropertyChangedEventArgs(memExp.Member.Name));
+            return Rectangle.Union(@this.Bounds, @this.WorkingArea);
+        }
+
+        public static AnchorStyles GetTaskbarLocation(this IScreen @this)
+        {
+            return InternalGetTaskbarLocation(@this.Bounds, @this.WorkingArea);
+        }
+
+        public static AnchorStyles GetTaskbarLocation(this Screen @this)
+        {
+            return InternalGetTaskbarLocation(@this.Bounds, @this.WorkingArea);
+        }
+
+        private static AnchorStyles InternalGetTaskbarLocation(
+            Rectangle bounds,
+            Rectangle workingArea)
+        {
+            var location = AnchorStyles.None;
+
+            if (workingArea.Height < bounds.Height)
+            {
+                if (workingArea.Top > bounds.Top)
+                {
+                    location |= AnchorStyles.Top;
+                }
+                if (bounds.Bottom > workingArea.Bottom)
+                {
+                    location |= AnchorStyles.Bottom;
+                }
             }
+
+            if (workingArea.Width < bounds.Width)
+            {
+                if (workingArea.Left > bounds.Left)
+                {
+                    location |= AnchorStyles.Left;
+                }
+                if (bounds.Right > workingArea.Right)
+                {
+                    location |= AnchorStyles.Right;
+                }
+            }
+
+            return location;
         }
     }
 }

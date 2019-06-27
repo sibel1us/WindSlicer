@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using WindSlicer.Services;
@@ -23,10 +24,10 @@ namespace WindSlicer.Models
             get => m_name;
             set
             {
-                if (value != null && value != this.m_name)
+                if (value != this.m_name)
                 {
                     this.m_name = value;
-                    OnPropertyChanged(x => x.Name);
+                    this.OnPropertyChanged();
                 }
             }
         }
@@ -39,9 +40,9 @@ namespace WindSlicer.Models
             this.Areas = new ObservableCollection<SnapAreaModel>();
         }
 
-        protected void OnPropertyChanged<T>(Expression<Func<LayoutModel, T>> expression)
+        protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
         {
-            PropertyChanged.InvokeFor(expression);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

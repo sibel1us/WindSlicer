@@ -11,18 +11,12 @@ using System.Windows.Data;
 
 namespace WindSlicer.Utilities.Converters
 {
-    public class RoutingConverter : DependencyObject, IValueConverter, INotifyPropertyChanged
+    public class RoutingConverter : DependencyObject, IValueConverter
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public bool Condition
         {
             get => (bool)this.GetValue(ConditionProperty);
-            set
-            {
-                this.SetValue(ConditionProperty, value);
-                this.OnPropertyChanged();
-            }
+            set => this.SetValue(ConditionProperty, value);
         }
 
         public static readonly DependencyProperty ConditionProperty =
@@ -39,19 +33,22 @@ namespace WindSlicer.Utilities.Converters
 
         public IValueConverter FalseConverter { get; set; }
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(
+            object value,
+            Type targetType,
+            object parameter,
+            CultureInfo culture)
         {
             return this.ActiveConverter?.Convert(value, targetType, parameter, culture);
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(
+            object value,
+            Type targetType,
+            object parameter,
+            CultureInfo culture)
         {
             return this.ActiveConverter?.ConvertBack(value, targetType, parameter, culture);
-        }
-
-        protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

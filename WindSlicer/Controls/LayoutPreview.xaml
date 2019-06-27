@@ -9,19 +9,23 @@
              xmlns:controls="clr-namespace:WindSlicer.Controls"
              xmlns:ext="clr-namespace:WindSlicer.Utilities.Extensions"
              xmlns:converters="clr-namespace:WindSlicer.Utilities.Converters"
+             xmlns:util="clr-namespace:WindSlicer.Utilities"
              xmlns:services="clr-namespace:WindSlicer.Services"
              xmlns:debug="clr-namespace:System.Diagnostics;assembly=System"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
+             Loaded="LayoutPreviewControl_Loaded"
              DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <UserControl.Resources>
-        <converters:BindingProxy x:Key="Proxy" Data="{Binding}"/>
+        <util:BindingProxy x:Key="Proxy" Data="{Binding}"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+        <converters:NotNullConverter x:Key="NotNullConverter"/>
+        <converters:ScreenNameConverter x:Key="ScreenNameConverter"/>
         <converters:RelativeSizeConverter x:Key="RelativeSizeConverter"/>
         <converters:PercentConverter x:Key="PercentConverter"/>
         <converters:PixelConverter x:Key="PixelConverter"
-                                   Width="{Binding Data.ResolutionX, Source={StaticResource Proxy}}"
-                                   Height="{Binding Data.ResolutionY, Source={StaticResource Proxy}}"/>
+                                   Width="{Binding Data.SelectedScreen.WorkingArea.Width, Source={StaticResource Proxy}}"
+                                   Height="{Binding Data.SelectedScreen.WorkingArea.Height, Source={StaticResource Proxy}}"/>
         <converters:RoutingConverter x:Key="PixelPercentConverter"
                                      Condition="{Binding Data.UsePixels, Source={StaticResource Proxy}}"
                                      TrueConverter="{StaticResource PixelConverter}"
@@ -46,6 +50,7 @@
                BasedOn="{StaticResource ValidatingControl}"
                TargetType="{x:Type TextBox}">
             <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="IsEnabled" Value="{Binding SelectedArea, Converter={StaticResource NotNullConverter}}"/>
         </Style>
         <Style x:Key="InputLabel"
                TargetType="{x:Type Label}">
@@ -62,6 +67,11 @@
                     <Setter Property="Content" Value="px"/>
                 </DataTrigger>
             </Style.Triggers>
+        </Style>
+        <Style x:Key="TaskBarStyle"
+               TargetType="{x:Type Canvas}">
+            <Setter Property="Background" Value="Navy"/>
+            <Setter Property="Visibility" Value="{Binding ShowTaskbar, Converter={StaticResource BoolToVisConverter}}"/>
         </Style>
     </UserControl.Resources>
     <Grid>
@@ -83,17 +93,41 @@
             <!--Preview container-->
             <Viewbox Stretch="Uniform"
                      HorizontalAlignment="Stretch">
-                <Canvas x:Name="Container"
-                    Background="BlanchedAlmond"
-                    SnapsToDevicePixels="True"
-                    Width="{Binding CanvasWidth}"
-                    Height="{Binding CanvasHeight}"/>
+                <DockPanel LastChildFill="True">
+                    <Canvas x:Name="TaskBarLeft"
+                            Style="{StaticResource TaskBarStyle}"
+                            Height="{Binding Height, ElementName=Container}"
+                            DockPanel.Dock="Left"/>
+                    <Canvas x:Name="TaskBarRight"
+                            Style="{StaticResource TaskBarStyle}"
+                            DockPanel.Dock="Right"
+                            Height="{Binding Height, ElementName=Container}"
+                            HorizontalAlignment="Right"/>
+                    <Canvas x:Name="TaskBarTop"
+                            Style="{StaticResource TaskBarStyle}"
+                            Width="{Binding Width, ElementName=Container}"
+                            DockPanel.Dock="Top"/>
+                    <Canvas x:Name="TaskBarBottom"
+                            Style="{StaticResource TaskBarStyle}"
+                            Width="{Binding Width, ElementName=Container}"
+                            DockPanel.Dock="Bottom"/>
+                    <Canvas x:Name="Container"
+                        Background="BlanchedAlmond"
+                        SnapsToDevicePixels="True"
+                        Width="{Binding SelectedScreen.WorkingArea.Width}"
+                        Height="{Binding SelectedScreen.WorkingArea.Height}"/>
+                </DockPanel>
             </Viewbox>
         </Border>
-        <Border x:Name="FormContainer"
+        <StackPanel x:Name="FormContainer"
                 Grid.Column="1"
                 Grid.Row="0"
                 Margin="8">
+            <CheckBox HorizontalAlignment="Center"
+                      VerticalContentAlignment="Center"
+                      IsChecked="{Binding UsePixels}">
+                <Label Content="{ext:Display UsePixels, {x:Type local:LayoutPreview}}"/>
+            </CheckBox>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -180,10 +214,11 @@
                         Grid.Row="4"
                         Grid.Column="1"
                         Style="{StaticResource ButtonStyle}"
+                        IsEnabled="{Binding SelectedArea, Converter={StaticResource NotNullConverter}}"
                         Click="UpdateButton_Click"
                         Content="Update"/>
             </Grid>
-        </Border>
+        </StackPanel>
         <ListBox x:Name="ItemListBox"
                  Grid.Column="1"
                  Grid.Row="1"
@@ -193,19 +228,22 @@
                  Margin="8"
                  MinWidth="160">
         </ListBox>
-        <DockPanel Grid.Row="3"
+        <StackPanel Grid.Row="3"
                    Grid.Column="0"
                    Margin="8,0,8,8"
                    VerticalAlignment="Center">
             <CheckBox VerticalContentAlignment="Center"
-                      DockPanel.Dock="Top"
-                      IsChecked="{Binding UsePixels}">
-                <Label Content="{ext:Display UsePixels, {x:Type local:LayoutPreview}}"/>
+                      IsChecked="{Binding ShowTaskbar}">
+                <Label Content="{ext:Display ShowTaskbar, {x:Type local:LayoutPreview}}"/>
             </CheckBox>
-            <Border DockPanel.Dock="Left">
-                <Label>ayy</Label>
-            </Border>
-        </DockPanel>
+            <ListBox ItemsSource="{Binding ScreenService.Screens}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Path=., Converter={StaticResource ScreenNameConverter}}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
         <DockPanel Grid.Row="3"
                    Grid.Column="1"
                    LastChildFill="False">
